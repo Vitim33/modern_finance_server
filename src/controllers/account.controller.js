@@ -1,0 +1,65 @@
+
+class AccountController {
+  async getAccountByUserId(req, res, next) {
+    try {
+      const { userId } = req.params;
+      const account = await accountService.getAccountByUserId(userId);
+      res.status(200).json(account);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getAccountBalance(req, res, next) {
+    try {
+      const { accountId } = req.params;
+      const balance = await accountService.getAccountBalance(accountId, req.user.id);
+      res.status(200).json({ balance });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async setTransferPassword(req, res, next) {
+    try {
+      const { accountNumber, transfer_password } = req.body;
+      const result = await accountService.setTransferPassword(accountNumber, transfer_password, req.user.id);
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async changeTransferPassword(req, res, next) {
+    try {
+      const { accountNumber, old_transfer_password, new_transfer_password } = req.body;
+      const result = await accountService.changeTransferPassword(accountNumber, old_transfer_password, new_transfer_password, req.user.id);
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async verifyTransferPassword(req, res, next) {
+    try {
+      const { accountNumber, transfer_password } = req.body;
+      const result = await accountService.verifyTransferPassword(accountNumber, transfer_password, req.user.id);
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async transfer(req, res, next) {
+    try {
+      const { fromAccountNumber, toAccountNumber, transfer_password, amount } = req.body;
+      const result = await accountService.transfer(fromAccountNumber, toAccountNumber, transfer_password, amount, req.user.id);
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+}
+
+module.exports = new AccountController();
+
