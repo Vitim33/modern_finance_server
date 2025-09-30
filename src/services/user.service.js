@@ -20,7 +20,7 @@ class UserService {
         {
           userId: newUser.id,
           accountNumber: `${Math.floor(Math.random() * 90000) + 10000}-${Math.floor(Math.random() * 9)}`,
-          balance: 0,
+          balance: 300,
         },
         { transaction }
       );
