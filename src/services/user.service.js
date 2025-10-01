@@ -7,12 +7,12 @@ const sequelize = require("../config/database");
 const SECRET_KEY = process.env.JWT_SECRET || "minha_chave_secreta";
 
 class UserService {
-  async register(username, email, password) {
+  async register(name, cpf, phone, email, password) {
     const transaction = await sequelize.transaction();
     try {
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = await User.create(
-        { username, email, password: hashedPassword },
+        { name, cpf, phone, email, password: hashedPassword },
         { transaction }
       );
 
@@ -26,7 +26,7 @@ class UserService {
       );
 
       const token = jwt.sign(
-        { id: newUser.id, username: newUser.username, email: newUser.email },
+        { id: newUser.id, name: newUser.name, email: newUser.email },
         SECRET_KEY,
         { expiresIn: "1h" }
       );
@@ -39,8 +39,8 @@ class UserService {
     }
   }
 
-  async login(username, password) {
-    const user = await User.findOne({ where: { username } });
+  async login(cpf, password) {
+    const user = await User.findOne({ where: { cpf } });
     if (!user) {
       throw new Error("Credenciais inválidas");
     }
@@ -51,7 +51,7 @@ class UserService {
     }
 
     const token = jwt.sign(
-      { id: user.id, username: user.username, email: user.email },
+      { id: user.id, cpf: user.cpf, email: user.email },
       SECRET_KEY,
       { expiresIn: "1h" }
     );

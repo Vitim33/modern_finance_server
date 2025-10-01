@@ -24,8 +24,8 @@ class AccountController {
 
   async setTransferPassword(req, res, next) {
     try {
-      const { accountNumber, transfer_password } = req.body;
-      const result = await accountService.setTransferPassword(accountNumber, transfer_password, req.user.id);
+      const { accountNumber, transferPassword } = req.body;
+      const result = await accountService.setTransferPassword(accountNumber, transferPassword, req.user.id);
       res.status(200).json(result);
     } catch (error) {
       next(error);
@@ -34,11 +34,11 @@ class AccountController {
 
   async changeTransferPassword(req, res, next) {
     try {
-      const { accountNumber, old_transfer_password, new_transfer_password } = req.body;
+      const { accountNumber, old_transferPassword, new_transferPassword } = req.body;
       const result = await accountService.changeTransferPassword(
         accountNumber,
-        old_transfer_password,
-        new_transfer_password,
+        old_transferPassword,
+        new_transferPassword,
         req.user.id
       );
       res.status(200).json(result);
@@ -59,11 +59,11 @@ class AccountController {
 
   async transfer(req, res, next) {
     try {
-      const { fromAccountNumber, toAccountNumber, transfer_password, amount } = req.body;
+      const { fromAccountNumber, toAccountNumber, transferPassword, amount } = req.body;
       const result = await accountService.transfer(
         fromAccountNumber,
         toAccountNumber,
-        transfer_password,
+        transferPassword,
         amount,
         req.user.id
       );
@@ -75,8 +75,8 @@ class AccountController {
 
   async register(req, res, next) {
     try {
-      const { username, email, password } = req.body;
-      const user = await accountService.register(username, email, password);
+      const { name, cpf, phone, email, password } = req.body;
+      const user = await accountService.register(name, cpf, phone, email, password);
       res.status(201).json(user);
     } catch (error) {
       next(error);
@@ -85,8 +85,8 @@ class AccountController {
 
   async login(req, res, next) {
     try {
-      const { email, password } = req.body;
-      const token = await accountService.login(email, password);
+      const { cpf, password } = req.body;
+      const token = await accountService.login(cpf, password);
       res.status(200).json({ token });
     } catch (error) {
       next(error);

@@ -7,19 +7,19 @@ const transferPasswordSchema = Joi.string().pattern(new RegExp("^\\d{4,}$")).req
 
 const setTransferPasswordSchema = Joi.object({
   accountNumber: Joi.string().required(),
-  transfer_password: transferPasswordSchema,
+  transferPassword: transferPasswordSchema,
 });
 
 const changeTransferPasswordSchema = Joi.object({
   accountNumber: Joi.string().required(),
-  old_transfer_password: transferPasswordSchema,
-  new_transfer_password: transferPasswordSchema,
+  old_transferPassword: transferPasswordSchema,
+  new_transferPassword: transferPasswordSchema,
 });
 
 const transferSchema = Joi.object({
   fromAccountNumber: Joi.string().required(),
   toAccountNumber: Joi.string().required(),
-  transfer_password: transferPasswordSchema,
+  transferPassword: transferPasswordSchema,
   amount: Joi.number().positive().precision(2).required().messages({
     "number.base": "O valor da transferência deve ser um número.",
     "number.positive": "O valor da transferência deve ser maior que zero.",

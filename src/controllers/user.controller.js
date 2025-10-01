@@ -5,14 +5,14 @@ const invalidTokens = [];
 class UserController {
   async register(req, res, next) {
     try {
-      const { username, email, password } = req.body;
-      const { user, account, token } = await userService.register(username, email, password);
+      const { name, cpf, phone, email, password } = req.body;
+      const { user, account, token } = await userService.register(name, cpf, phone, email, password);
 
-      res.status(201).json({ 
-        message: "Usuário e conta criados com sucesso", 
-        token, 
-        user, 
-        account 
+      res.status(201).json({
+        message: "Usuário e conta criados com sucesso",
+        token,
+        user,
+        account
       });
     } catch (error) {
       next(error);
@@ -21,13 +21,13 @@ class UserController {
 
   async login(req, res, next) {
     try {
-      const { username, password } = req.body;
-      const { user, token } = await userService.login(username, password);
+      const { cpf, password } = req.body;
+      const { user, token } = await userService.login(cpf, password);
 
-      res.status(200).json({ 
-        message: "Login realizado com sucesso", 
-        token, 
-        user: { id: user.id, username: user.username, email: user.email } 
+      res.status(200).json({
+        message: "Login realizado com sucesso",
+        token,
+        user: { id: user.id, name: user.name, cpf: user.cpf, phone: user.phone, email: user.email }
       });
     } catch (error) {
       next(error);

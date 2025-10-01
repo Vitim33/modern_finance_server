@@ -85,35 +85,35 @@ O servidor estará rodando em `http://localhost:3000` (ou na porta especificada 
 *   **`GET /api/accounts/:userId`**
     *   **Descrição**: Retorna os detalhes da conta de um usuário específico.
     *   **Autenticação**: Requer token JWT.
-    *   **Exemplo de Resposta**: `{ id, userId, accountNumber, balance, transfer_password }`
+    *   **Exemplo de Resposta**: `{ id, userId, accountNumber, balance, transferPassword }`
 
 *   **`GET /api/accounts/:accountId/balance`**
     *   **Descrição**: Retorna o saldo de uma conta específica.
     *   **Autenticação**: Requer token JWT.
     *   **Exemplo de Resposta**: `{ balance }`
 
-*   **`POST /api/accounts/set_transfer_password`**
+*   **`POST /api/accounts/set_transferPassword`**
     *   **Descrição**: Define ou atualiza a senha de transferência de uma conta.
     *   **Autenticação**: Requer token JWT.
-    *   **Corpo da Requisição**: `{ accountNumber, transfer_password }`
+    *   **Corpo da Requisição**: `{ accountNumber, transferPassword }`
     *   **Exemplo de Resposta**: `{ message }`
 
-*   **`POST /api/accounts/change_transfer_password`**
+*   **`POST /api/accounts/change_transferPassword`**
     *   **Descrição**: Altera a senha de transferência de uma conta.
     *   **Autenticação**: Requer token JWT.
-    *   **Corpo da Requisição**: `{ accountNumber, old_transfer_password, new_transfer_password }`
+    *   **Corpo da Requisição**: `{ accountNumber, old_transferPassword, new_transferPassword }`
     *   **Exemplo de Resposta**: `{ message }`
 
-*   **`POST /api/accounts/verify_transfer_password`**
+*   **`POST /api/accounts/verify_transferPassword`**
     *   **Descrição**: Verifica a senha de transferência de uma conta.
     *   **Autenticação**: Requer token JWT.
-    *   **Corpo da Requisição**: `{ accountNumber, transfer_password }`
+    *   **Corpo da Requisição**: `{ accountNumber, transferPassword }`
     *   **Exemplo de Resposta**: `{ message }`
 
 *   **`POST /api/accounts/transfer`**
     *   **Descrição**: Realiza uma transferência entre contas.
     *   **Autenticação**: Requer token JWT.
-    *   **Corpo da Requisição**: `{ fromAccountNumber, toAccountNumber, transfer_password, amount }`
+    *   **Corpo da Requisição**: `{ fromAccountNumber, toAccountNumber, transferPassword, amount }`
     *   **Exemplo de Resposta**: `{ message, fromAccount, toAccount }`
 
 ## Testes

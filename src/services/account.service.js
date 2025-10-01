@@ -22,7 +22,7 @@ class AccountService {
     return account.balance;
   }
 
-  async setTransferPassword(accountNumber, transfer_password, userId) {
+  async setTransferPassword(accountNumber, transferPassword, userId) {
     const account = await Account.findOne({ where: { accountNumber } });
     if (!account) {
       throw new Error("Conta não encontrada");
@@ -31,13 +31,13 @@ class AccountService {
       throw new Error("Acesso negado a esta conta");
     }
 
-    const hashedTransferPassword = await bcrypt.hash(transfer_password, 10);
-    account.transfer_password = hashedTransferPassword;
+    const hashedTransferPassword = await bcrypt.hash(transferPassword, 10);
+    account.transferPassword = hashedTransferPassword;
     await account.save();
     return { message: "Senha de transferência definida/atualizada com sucesso" };
   }
 
-  async changeTransferPassword(accountNumber, old_transfer_password, new_transfer_password, userId) {
+  async changeTransferPassword(accountNumber, old_transferPassword, new_transferPassword, userId) {
     const account = await Account.findOne({ where: { accountNumber } });
     if (!account) {
       throw new Error("Conta não encontrada");
@@ -46,22 +46,22 @@ class AccountService {
       throw new Error("Acesso negado a esta conta");
     }
 
-    if (!account.transfer_password) {
+    if (!account.transferPassword) {
       throw new Error("Ainda não existe senha de transferência definida.");
     }
 
-    const isMatch = await bcrypt.compare(old_transfer_password, account.transfer_password);
+    const isMatch = await bcrypt.compare(old_transferPassword, account.transferPassword);
     if (!isMatch) {
       throw new Error("Senha atual incorreta.");
     }
 
-    const newPasswordIsSame = await bcrypt.compare(new_transfer_password, account.transfer_password);
+    const newPasswordIsSame = await bcrypt.compare(new_transferPassword, account.transferPassword);
     if (newPasswordIsSame) {
       throw new Error("A nova senha não pode ser igual a atual.");
     }
 
-    const hashedNewTransferPassword = await bcrypt.hash(new_transfer_password, 10);
-    account.transfer_password = hashedNewTransferPassword;
+    const hashedNewTransferPassword = await bcrypt.hash(new_transferPassword, 10);
+    account.transferPassword = hashedNewTransferPassword;
     await account.save();
     return { message: "Senha de transferência alterada com sucesso." };
   }
@@ -78,14 +78,14 @@ class AccountService {
       return { success: false, message: "Conta não encontrada" };
     }
 
-    if (account.transfer_password === null) {
+    if (account.transferPassword === null) {
       return { success: false, message: "Senha de transferência não definida" };
     }
 
     return { success: true, message: "Senha de transferência definida" };
   }
 
-  async transfer(fromAccountNumber, toAccountNumber, transfer_password, amount, userId) {
+  async transfer(fromAccountNumber, toAccountNumber, transferPassword, amount, userId) {
     const transaction = await sequelize.transaction();
     try {
       const fromAccount = await Account.findOne({ where: { accountNumber: fromAccountNumber }, transaction });
@@ -103,13 +103,13 @@ class AccountService {
         throw new Error("Não é possível transferir para a mesma conta");
       }
 
-      if (!fromAccount.transfer_password) {
+      if (!fromAccount.transferPassword) {
         const error = new Error("Senha de transferência não definida. Por favor, defina-a antes de transferir.");
         error.code = "P404";
         throw error;
       }
 
-      const isMatch = await bcrypt.compare(transfer_password, fromAccount.transfer_password);
+      const isMatch = await bcrypt.compare(transferPassword, fromAccount.transferPassword);
       if (!isMatch) {
         const error = new Error("Senha de transferência incorreta");
         error.code = "P401";

@@ -1,16 +1,16 @@
 const express = require("express");
 const accountController = require("../controllers/account.controller");
 const authenticateToken = require("../middlewares/auth.middleware");
-const { 
-  validateSetTransferPassword, 
-  validateChangeTransferPassword, 
-  validateTransfer 
+const {
+  validateSetTransferPassword,
+  validateChangeTransferPassword,
+  validateTransfer
 } = require("../validators/account.validator");
 
 const router = express.Router();
 
 /** ROTAS PÚBLICAS (não precisam de token) */
-router.post("/register", accountController.register); 
+router.post("/register", accountController.register);
 router.post("/login", accountController.login);
 
 

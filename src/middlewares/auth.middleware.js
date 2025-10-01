@@ -1,11 +1,11 @@
 const jwt = require("jsonwebtoken");
-const { invalidTokens } = require("../controllers/user.controller"); 
+const { invalidTokens } = require("../controllers/user.controller");
 
 const SECRET_KEY = process.env.JWT_SECRET || "minha_chave_secreta";
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1]; 
+  const token = authHeader && authHeader.split(" ")[1];
 
   if (!token || invalidTokens.includes(token)) {
     return res.status(401).json({ status: false, message: "Token inválido ou não fornecido" });
