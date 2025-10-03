@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const path = require("path");
+const cors = require("cors");
 const sequelize = require("./src/config/database");
 const swaggerUi = require("swagger-ui-express");
 const YAML = require("yamljs");
@@ -8,10 +9,11 @@ const YAML = require("yamljs");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware para JSON
+// Middlewares
 app.use(express.json());
+app.use(cors()); // ✅ Habilita CORS para Swagger UI e outras requisições
 
-// Servir arquivos estáticos (se precisar)
+// Servir arquivos estáticos, se necessário
 app.use("/docs", express.static(path.join(__dirname, "docs")));
 
 // Carregar Swagger
@@ -29,7 +31,7 @@ app.use("/accounts", accountRoutes);
 const errorHandler = require("./src/utils/errorHandler");
 app.use(errorHandler);
 
-// Conectar e sincronizar com o banco
+// Conectar e sincronizar banco de dados
 const syncDb = async () => {
   try {
     await sequelize.authenticate();
@@ -45,6 +47,10 @@ const syncDb = async () => {
 syncDb().then(() => {
   app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
-    console.log(`Swagger disponível em ${process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`}/api-docs`);
+    console.log(
+      `Swagger disponível em ${
+        process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`
+      }/api-docs`
+    );
   });
 });

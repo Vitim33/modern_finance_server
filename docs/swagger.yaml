@@ -5,12 +5,10 @@ info:
   version: 1.0.0
 
 servers:
-  - url: http://localhost:3000
-    description: Servidor local (VSCode)
   - url: https://<SEU-APP-NOME>.onrender.com
-    description: Servidor Render
-  - url: https://api-alternativa.exemplo.com
-    description: Outro servidor de teste
+    description: Produção Render
+  - url: http://localhost:3000
+    description: Desenvolvimento local
 
 paths:
   ### USERS ###
