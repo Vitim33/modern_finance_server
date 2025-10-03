@@ -1,29 +1,30 @@
 require("dotenv").config();
 const express = require("express");
+const path = require("path");
+const sequelize = require("./src/config/database");
+const swaggerUi = require("swagger-ui-express");
+const YAML = require("yamljs");
+
 const app = express();
 const PORT = process.env.PORT || 3000;
-const sequelize = require("./src/config/database");
 
-// Models
-const User = require("./src/models/user.model");
-const Account = require("./src/models/account.model");
-
-// Middlewares
 app.use(express.json());
 
-// Rotas
+app.use("/docs", express.static(path.join(__dirname, "docs")));
+
+const swaggerDocument = YAML.load(path.join(__dirname, "docs", "swagger.yaml"));
+
 const userRoutes = require("./src/routes/user.routes");
 const accountRoutes = require("./src/routes/account.routes");
 
-// Define prefixos para as rotas
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 app.use("/users", userRoutes);
 app.use("/accounts", accountRoutes);
 
-// Middleware de tratamento de erros
 const errorHandler = require("./src/utils/errorHandler");
 app.use(errorHandler);
 
-// Conectar e sincronizar banco
 const syncDb = async () => {
   try {
     await sequelize.authenticate();
@@ -38,5 +39,6 @@ const syncDb = async () => {
 syncDb().then(() => {
   app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
+    console.log(`Swagger disponível em http://localhost:${PORT}/api-docs`);
   });
 });
