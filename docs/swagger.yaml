@@ -3,8 +3,14 @@ info:
   title: Modern Finance API
   description: API para gerenciamento de usuários, contas e transferências
   version: 1.0.0
+
 servers:
   - url: http://localhost:3000
+    description: Servidor local (VSCode)
+  - url: https://<SEU-APP-NOME>.onrender.com
+    description: Servidor Render
+  - url: https://api-alternativa.exemplo.com
+    description: Outro servidor de teste
 
 paths:
   ### USERS ###
