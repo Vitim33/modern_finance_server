@@ -5,10 +5,10 @@ info:
   version: 1.0.0
 
 servers:
-  - url: https://<SEU-APP-NOME>.onrender.com
-    description: Produção Render
   - url: http://localhost:3000
-    description: Desenvolvimento local
+    description: Servidor Local
+  - url: https://modern-finance-server.onrender.com
+    description: Servidor Render (Produção)
 
 paths:
   ### USERS ###
