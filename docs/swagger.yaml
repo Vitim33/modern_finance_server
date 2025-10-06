@@ -7,7 +7,7 @@ info:
 servers:
   - url: http://localhost:3000
     description: Servidor Local
-  - url: https://modern-finance-server.onrender.com
+  - url: https://modern-finance-server-s8ua.onrender.com
     description: Servidor Render (Produção)
 
 paths:
