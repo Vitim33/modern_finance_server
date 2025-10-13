@@ -26,7 +26,7 @@ class AccountController {
     try {
       const { name, cpf, phone, email, password } = req.body;
       const user = await accountService.register(name, cpf, phone, email, password);
-      res.status(201).json(user);
+      res.status(200).json(user);
     } catch (error) {
       next(error);
     }

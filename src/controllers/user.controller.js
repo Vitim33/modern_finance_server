@@ -8,7 +8,7 @@ class UserController {
       const { name, cpf, phone, email, password } = req.body;
       const { user, account, token } = await userService.register(name, cpf, phone, email, password);
 
-      res.status(201).json({
+      res.status(200).json({
         message: "Usuário e conta criados com sucesso",
         token,
         user,

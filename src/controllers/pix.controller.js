@@ -5,7 +5,7 @@ class PixController {
     try {
       const { accountId, keyType, keyValue } = req.body;
       const pixKey = await pixService.createPixKey(accountId, keyType, keyValue, req.user.id);
-      res.status(201).json(pixKey);
+      res.status(200).json(pixKey);
     } catch (error) {
       next(error);
     }
