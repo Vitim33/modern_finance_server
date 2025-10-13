@@ -401,6 +401,8 @@ components:
     CreatePixKeyRequest:
       type: object
       properties:
+        accountId:
+          type: string
         keyType:
           type: string
         keyValue:

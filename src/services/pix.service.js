@@ -20,7 +20,7 @@ class PixService {
     }
 
     if (keyType === 'aleatoria') {
-      keyValue = uuidv4(); // Gerar chave aleatória se o tipo for 'aleatoria'
+      keyValue = uuidv4(); 
     }
 
     const existingKey = await PixKeys.findOne({ where: { keyValue } });
