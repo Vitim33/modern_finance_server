@@ -17,14 +17,13 @@ const PixKeys = sequelize.define("PixKeys", {
     },
   },
   keyType: {
-    type: DataTypes.ARRAY('cpf', 'email', 'telefone', 'aleatoria'),
+    type: DataTypes.ENUM('cpf', 'email', 'telefone', 'aleatoria'),
     allowNull: false,
     unique: true,
   },
   keyValue: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue: 0.0,
   },
 });
 
@@ -32,4 +31,3 @@ Account.hasOne(PixKeys, { foreignKey: "accountId" });
 PixKeys.belongsTo(Account, { foreignKey: "accountId" });
 
 module.exports = PixKeys;
-

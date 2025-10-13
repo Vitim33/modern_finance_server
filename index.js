@@ -19,9 +19,13 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 const userRoutes = require("./src/routes/user.routes");
 const accountRoutes = require("./src/routes/account.routes");
+const transferRoutes = require("./src/routes/transfer.routes");
+const pixRoutes = require("./src/routes/pix.routes");
 
 app.use("/users", userRoutes);
 app.use("/accounts", accountRoutes);
+app.use("/transfers", transferRoutes);
+app.use("/pix", pixRoutes);
 
 const errorHandler = require("./src/utils/errorHandler");
 app.use(errorHandler);

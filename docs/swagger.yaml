@@ -1,20 +1,19 @@
 openapi: 3.0.0
 info:
   title: Modern Finance API
-  description: API para gerenciamento de usuários, contas e transferências
+  description: API for managing users, accounts, transfers, and PIX transactions.
   version: 1.0.0
-
 servers:
   - url: http://localhost:3000
-    description: Servidor Local
+    description: Development server
   - url: https://modern-finance-server-s8ua.onrender.com
-    description: Servidor Render (Produção)
+    description: Production Server (Render)
 
 paths:
   ### USERS ###
   /users/register:
     post:
-      summary: Registrar novo usuário + conta
+      summary: Register a new user and account
       tags: [Users]
       requestBody:
         required: true
@@ -24,7 +23,7 @@ paths:
               $ref: "#/components/schemas/RegisterRequest"
       responses:
         "201":
-          description: Usuário e conta criados com sucesso
+          description: User and account created successfully
           content:
             application/json:
               schema:
@@ -39,13 +38,13 @@ paths:
                   account:
                     $ref: "#/components/schemas/Account"
         "400":
-          description: Erro de validação
+          description: Validation error
         "500":
-          description: Erro interno
+          description: Internal error
 
   /users/login:
     post:
-      summary: Login de usuário
+      summary: User login
       tags: [Users]
       requestBody:
         required: true
@@ -63,7 +62,7 @@ paths:
                   type: string
       responses:
         "200":
-          description: Login bem-sucedido
+          description: Login successful
           content:
             application/json:
               schema:
@@ -76,19 +75,19 @@ paths:
                   user:
                     $ref: "#/components/schemas/User"
         "401":
-          description: Credenciais inválidas
+          description: Invalid credentials
         "500":
-          description: Erro interno
+          description: Internal error
 
   /users/me:
     get:
-      summary: Obter usuário autenticado
+      summary: Get authenticated user
       tags: [Users]
       security:
         - bearerAuth: []
       responses:
         "200":
-          description: Usuário atual
+          description: Current user
           content:
             application/json:
               schema:
@@ -97,19 +96,19 @@ paths:
                   user:
                     $ref: "#/components/schemas/User"
         "401":
-          description: Token inválido ou expirado
+          description: Invalid or expired token
         "500":
-          description: Erro interno
+          description: Internal error
 
   /users/logout:
     post:
-      summary: Logout do usuário
+      summary: User logout
       tags: [Users]
       security:
         - bearerAuth: []
       responses:
         "200":
-          description: Logout realizado com sucesso
+          description: Logout successful
           content:
             application/json:
               schema:
@@ -120,14 +119,14 @@ paths:
                   message:
                     type: string
         "400":
-          description: Token não encontrado
+          description: Token not found
         "500":
-          description: Erro interno
+          description: Internal error
 
   ### ACCOUNTS ###
   /accounts/{userId}:
     get:
-      summary: Buscar conta pelo userId
+      summary: Get account by userId
       tags: [Accounts]
       security:
         - bearerAuth: []
@@ -139,17 +138,17 @@ paths:
             type: string
       responses:
         "200":
-          description: Conta encontrada
+          description: Account found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Account"
         "404":
-          description: Conta não encontrada
+          description: Account not found
 
   /accounts/{accountId}/balance:
     get:
-      summary: Buscar saldo da conta
+      summary: Get account balance
       tags: [Accounts]
       security:
         - bearerAuth: []
@@ -161,7 +160,7 @@ paths:
             type: string
       responses:
         "200":
-          description: Saldo da conta
+          description: Account balance
           content:
             application/json:
               schema:
@@ -171,10 +170,11 @@ paths:
                     type: number
                     format: float
 
-  /accounts/set_transfer_password:
+  ### TRANSFERS ###
+  /transfers/set_transfer_password:
     post:
-      summary: Definir senha de transferência
-      tags: [Accounts]
+      summary: Set transfer password
+      tags: [Transfers]
       security:
         - bearerAuth: []
       requestBody:
@@ -182,20 +182,15 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                accountNumber:
-                  type: string
-                transferPassword:
-                  type: string
+              $ref: "#/components/schemas/SetTransferPasswordRequest"
       responses:
         "200":
-          description: Senha definida com sucesso
+          description: Password set successfully
 
-  /accounts/change_transfer_password:
+  /transfers/change_transfer_password:
     post:
-      summary: Alterar senha de transferência
-      tags: [Accounts]
+      summary: Change transfer password
+      tags: [Transfers]
       security:
         - bearerAuth: []
       requestBody:
@@ -203,22 +198,15 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                accountNumber:
-                  type: string
-                old_transferPassword:
-                  type: string
-                new_transferPassword:
-                  type: string
+              $ref: "#/components/schemas/ChangeTransferPasswordRequest"
       responses:
         "200":
-          description: Senha alterada com sucesso
+          description: Password changed successfully
 
-  /accounts/verify_transfer_password:
+  /transfers/verify_transfer_password:
     post:
-      summary: Verificar senha de transferência
-      tags: [Accounts]
+      summary: Verify transfer password
+      tags: [Transfers]
       security:
         - bearerAuth: []
       requestBody:
@@ -226,18 +214,15 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                accountNumber:
-                  type: string
+              $ref: "#/components/schemas/VerifyTransferPasswordRequest"
       responses:
         "200":
-          description: Resultado da verificação
+          description: Verification result
 
-  /accounts/transfer:
+  /transfers/transfer:
     post:
-      summary: Transferência entre contas
-      tags: [Accounts]
+      summary: Transfer between accounts
+      tags: [Transfers]
       security:
         - bearerAuth: []
       requestBody:
@@ -245,20 +230,69 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                fromAccountNumber:
-                  type: string
-                toAccountNumber:
-                  type: string
-                transferPassword:
-                  type: string
-                amount:
-                  type: number
-                  format: float
+              $ref: "#/components/schemas/TransferRequest"
       responses:
         "200":
-          description: Transferência realizada com sucesso
+          description: Transfer successful
+
+  ### PIX ###
+  /pix/PixKey:
+    post:
+      summary: Create a new PIX key
+      tags: [PIX]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePixKeyRequest"
+      responses:
+        "201":
+          description: PIX key created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PixKey"
+
+  /pix/PixKey/{PixKeyValue}:
+    get:
+      summary: Get PIX key by value
+      tags: [PIX]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: PixKeyValue
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: PIX key found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PixKey"
+        "404":
+          description: PIX key not found
+
+  /pix/transferPix:
+    post:
+      summary: Transfer using PIX
+      tags: [PIX]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PixTransferRequest"
+      responses:
+        "200":
+          description: PIX transfer successful
 
 components:
   securitySchemes:
@@ -295,6 +329,18 @@ components:
           type: number
           format: float
 
+    PixKey:
+      type: object
+      properties:
+        id:
+          type: string
+        accountId:
+          type: string
+        keyType:
+          type: string
+        keyValue:
+          type: string
+
     RegisterRequest:
       type: object
       required:
@@ -314,6 +360,62 @@ components:
           type: string
         password:
           type: string
+
+    SetTransferPasswordRequest:
+      type: object
+      properties:
+        accountNumber:
+          type: string
+        transferPassword:
+          type: string
+
+    ChangeTransferPasswordRequest:
+      type: object
+      properties:
+        accountNumber:
+          type: string
+        old_transferPassword:
+          type: string
+        new_transferPassword:
+          type: string
+
+    VerifyTransferPasswordRequest:
+      type: object
+      properties:
+        accountNumber:
+          type: string
+
+    TransferRequest:
+      type: object
+      properties:
+        fromAccountNumber:
+          type: string
+        toAccountNumber:
+          type: string
+        transferPassword:
+          type: string
+        amount:
+          type: number
+          format: float
+
+    CreatePixKeyRequest:
+      type: object
+      properties:
+        keyType:
+          type: string
+        keyValue:
+          type: string
+
+    PixTransferRequest:
+      type: object
+      properties:
+        fromAccountId:
+          type: string
+        toPixKey:
+          type: string
+        amount:
+          type: number
+          format: float
 
 security:
   - bearerAuth: []
