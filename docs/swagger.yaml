@@ -249,7 +249,7 @@ paths:
             schema:
               $ref: "#/components/schemas/CreatePixKeyRequest"
       responses:
-        "201":
+        "200":
           description: PIX key created successfully
           content:
             application/json:
