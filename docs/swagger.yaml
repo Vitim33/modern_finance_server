@@ -22,7 +22,7 @@ paths:
             schema:
               $ref: "#/components/schemas/RegisterRequest"
       responses:
-        "201":
+        "200":
           description: User and account created successfully
           content:
             application/json:
