@@ -16,7 +16,7 @@ const authenticateToken = (req, res, next) => {
       return res.status(403).json({ status: false, message: "Token inválido ou expirado" });
     }
 
-    req.user = user;
+    req.user = user; // ✅ necessário para usar em controllers
     req.token = token;
     next();
   });
