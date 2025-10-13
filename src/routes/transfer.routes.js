@@ -8,7 +8,7 @@ const {
   validateTransfer
 } = require("../validators/transfer.validator");
 
-router.post("set_transfer_password", validateSetTransferPassword, authMiddleware, transferController.setTransferPassword);
+router.post("/set_transfer_password", validateSetTransferPassword, authMiddleware, transferController.setTransferPassword);
 router.post("/change_transfer_password", validateChangeTransferPassword, authMiddleware, transferController.changeTransferPassword);
 router.post("/verify_transfer_password", transferController.verifyTransferPassword);
 router.post("/transfer", validateTransfer, authMiddleware, transferController.transfer);

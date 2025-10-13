@@ -27,7 +27,7 @@ const Account = sequelize.define("Account", {
     defaultValue: 0.0,
   },
   transferPassword: {
-    type: DataTypes.STRING,
+    type: DataTypes.DECIMAL,
     allowNull: true,
   },
 });
