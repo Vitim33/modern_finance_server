@@ -36,6 +36,12 @@ class PixService {
     return pixKey;
   }
 
+    async getPixKeysByAccountId(accountId) {
+    const pixKeys = await PixKeys.findAll({ where: { accountId } });
+    return pixKeys;
+  }
+
+
   async getPixKeyByValue(keyValue) {
     const pixKey = await PixKeys.findOne({ where: { keyValue }, include: [Account] });
     if (!pixKey) {
