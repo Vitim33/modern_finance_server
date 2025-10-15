@@ -11,21 +11,10 @@ class PixController {
     }
   }
 
-  async getPixKeyByAccountId(req, res, next) {
-    try {
-      const { accountId } = req.params;
-      const pixKeys = await pixService.getPixKeysByAccountId(accountId);
-      res.status(200).json(pixKeys);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-
   async getPixKeyByValue(req, res, next) {
     try {
-      const { keyValue } = req.params;
-      const pixKey = await pixService.getPixKeyByValue(keyValue);
+      const { pixKeyValue } = req.params;
+      const pixKey = await pixService.getPixKeyByValue(pixKeyValue);
       res.status(200).json(pixKey);
     } catch (error) {
       next(error);
