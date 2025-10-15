@@ -44,6 +44,21 @@ class PixService {
     return pixKey;
   }
 
+  async getPixKeysByAccountId(accountId) {
+  const pixKeys = await PixKeys.findAll({
+    where: { accountId: String(accountId) },
+    include: [Account],
+    raw: false, 
+  });
+
+  if (!pixKeys || pixKeys.length === 0) {
+    throw new Error("Nenhuma chave PIX encontrada para esta conta.");
+  }
+
+  return pixKeys;
+}
+  
+
   async transferPix(fromAccountId, toPixKeyValue, amount, transferPassword, userId) {
     const transaction = await sequelize.transaction();
     try {
