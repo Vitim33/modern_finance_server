@@ -11,17 +11,7 @@ class PixController {
     }
   }
 
-  async getPixKeyByValue(req, res, next) {
-    try {
-      const { pixKeyValue } = req.params;
-      const pixKey = await pixService.getPixKeyByValue(pixKeyValue);
-      res.status(200).json(pixKey);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-    async getPixKeys(req, res, next) {
+    async getPixKeysByAccountId(req, res, next) {
     try {
       const { accountId } = req.params; 
       const pixKeys = await pixService.getPixKeysByAccountId(accountId);
