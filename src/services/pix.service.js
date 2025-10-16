@@ -14,13 +14,13 @@ class PixService {
       throw new Error("Acesso negado a esta conta");
     }
 
-    const validKeyTypes = ['cpf', 'email', 'telefone', 'aleatoria'];
+    const validKeyTypes = ['CPF', 'Email', 'Telefone', 'Aleatoria'];
     if (!validKeyTypes.includes(keyType)) {
-      throw new Error("Tipo de chave PIX inválido. Tipos permitidos: cpf, email, telefone, aleatoria.");
+      throw new Error("Tipo de chave PIX inválido. Tipos permitidos: CPF, Email, Telefone, Aleatoria.");
     }
 
-    if (keyType === 'aleatoria') {
-      keyValue = uuidv4(); 
+    if (keyType === 'Aleatoria') {
+      keyValue = uuidv4();
     }
 
     const existingKey = await PixKeys.findOne({ where: { keyValue } });
@@ -36,20 +36,36 @@ class PixService {
     return pixKey;
   }
 
-  async getPixKeysByAccountId(accountId) {
-  const pixKeys = await PixKeys.findAll({
-    where: { accountId: String(accountId) },
-    include: [Account],
-    raw: false, 
-  });
+  async deletePixKey(keyType) {
+    const pixKeys = await PixKeys.findAll({
+      where: { keyType: String(keyType) },
+    });
 
-  if (!pixKeys || pixKeys.length === 0) {
-    throw new Error("Nenhuma chave PIX encontrada para esta conta.");
+    if (!pixKeys || pixKeys.length === 0) {
+      throw new Error("Nenhuma chave PIX encontrada para este tipo.");
+    }
+
+    await PixKeys.destroy({
+      where: { keyType: String(keyType) },
+    });
+
+    return { message: "Chave(s) PIX deletada(s) com sucesso." };
   }
 
-  return pixKeys;
-}
-  
+  async getPixKeysByAccountId(accountId) {
+    const pixKeys = await PixKeys.findAll({
+      where: { accountId: String(accountId) },
+      include: [Account],
+      raw: false,
+    });
+
+    if (!pixKeys || pixKeys.length === 0) {
+      throw new Error("Nenhuma chave PIX encontrada para esta conta.");
+    }
+
+    return pixKeys;
+  }
+
 
   async transferPix(fromAccountId, toPixKeyValue, amount, transferPassword, userId) {
     const transaction = await sequelize.transaction();

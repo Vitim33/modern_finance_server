@@ -17,7 +17,7 @@ const PixKeys = sequelize.define("PixKeys", {
     },
   },
   keyType: {
-    type: DataTypes.ENUM('cpf', 'email', 'telefone', 'aleatoria'),
+    type: DataTypes.ENUM('CPF', 'Email', 'Telefone', 'Aleatoria'),
     allowNull: false,
     unique: true,
   },

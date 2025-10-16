@@ -10,7 +10,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(cors()); 
+app.use(cors());
 
 app.use("/docs", express.static(path.join(__dirname, "docs")));
 
@@ -45,8 +45,7 @@ syncDb().then(() => {
   app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
     console.log(
-      `Swagger disponível em ${
-        process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`
+      `Swagger disponível em ${process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`
       }/api-docs`
     );
   });
