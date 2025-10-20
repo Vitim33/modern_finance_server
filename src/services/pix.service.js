@@ -55,7 +55,6 @@ class PixService {
   async getPixKeysByAccountId(accountId) {
     const pixKeys = await PixKeys.findAll({
       where: { accountId: String(accountId) },
-      include: [Account],
       raw: false,
     });
 
