@@ -40,6 +40,20 @@ class PixController {
       next(error);
     }
   }
+
+  async createPixQr(req, res, next) {
+    try {
+      const { accountId, amount, userId, expiresInMinutes} = req.body;
+      const qr = await pixService.createPixQr(
+        accountId,
+        amount,
+        userId,
+        expiresInMinutes);
+      res.status(200).json(qr);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new PixController();

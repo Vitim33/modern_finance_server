@@ -1,5 +1,7 @@
 const bcrypt = require("bcryptjs");
 const { v4: uuidv4 } = require("uuid");
+const PixQr = require("../models/pix_qr.model");
+const { generatePixPayload } = require("../utils/pix_qr.utils"); 
 const Account = require("../models/account.model");
 const PixKeys = require("../models/pix_keys.model");
 const sequelize = require("../config/database");
@@ -125,6 +127,48 @@ class PixService {
       throw error;
     }
   }
+
+  async createPixQr(accountId, amount, userId, expiresInMinutes = 60) {
+    const account = await Account.findByPk(accountId);
+    if (!account) throw new Error("Conta não encontrada.");
+    if (account.userId !== userId) throw new Error("Acesso negado a esta conta.");
+
+    const pixKeys = await PixKeys.findAll({ where: { accountId } });
+    if (!pixKeys || pixKeys.length === 0) {
+      throw new Error("Nenhuma chave Pix cadastrada para esta conta.");
+    }
+
+    const validKeys = pixKeys.filter(k => k.keyType !== "Aleatoria");
+    if (validKeys.length === 0) {
+      throw new Error("Nenhuma chave válida encontrada (CPF, Email ou Telefone).");
+    }
+
+    const chosenKey = validKeys[0];
+
+    const txid = uuidv4();
+    const payload = generatePixPayload({
+      pixKey: chosenKey.keyValue,
+      merchantName: account.ownerName || "RECEBEDOR",
+      merchantCity: account.city || "SAOPAULO",
+      amount,
+      txid,
+    });
+
+    const expiresAt = new Date(Date.now() + expiresInMinutes * 60000);
+
+    const qr = await PixQr.create({
+      accountId,
+      pixKey: chosenKey.keyValue,
+      amount,
+      txid,
+      payload,
+      expiresAt,
+      status: "pending",
+    });
+
+    return qr;
+  }
+
 }
 
 module.exports = new PixService();

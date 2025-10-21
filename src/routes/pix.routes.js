@@ -7,5 +7,6 @@ router.post("/PixKey", authMiddleware, pixController.createPixKey);
 router.delete("/deletePixKey/:keyType", authMiddleware, pixController.deletePixKey);
 router.get("/getPixKeysByAccountId/:accountId", authMiddleware, pixController.getPixKeysByAccountId);
 router.post("/transferPix", authMiddleware, pixController.transferPix);
+router.post("/createPixQr", authMiddleware, pixController.createPixQr);
 
 module.exports = router;
