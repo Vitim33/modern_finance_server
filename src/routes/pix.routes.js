@@ -5,6 +5,7 @@ const authMiddleware = require("../middlewares/auth.middleware");
 
 router.post("/PixKey", authMiddleware, pixController.createPixKey);
 router.delete("/deletePixKey/:keyType", authMiddleware, pixController.deletePixKey);
+router.delete("/deleteQrCode/:txid", authMiddleware, pixController.deleteQrCode);
 router.get("/getPixKeysByAccountId/:accountId", authMiddleware, pixController.getPixKeysByAccountId);
 router.post("/transferPix", authMiddleware, pixController.transferPix);
 router.post("/createPixQr", authMiddleware, pixController.createPixQr);

@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs");
 const { v4: uuidv4 } = require("uuid");
 const PixQr = require("../models/pix_qr.model");
-const { generatePixPayload } = require("../utils/pix_qr.utils"); 
+const { generatePixPayload } = require("../utils/pix_qr.utils");
 const Account = require("../models/account.model");
 const PixKeys = require("../models/pix_keys.model");
 const sequelize = require("../config/database");
@@ -128,7 +128,7 @@ class PixService {
     }
   }
 
-  async createPixQr(accountId, amount, userId, expiresInMinutes = 60) {
+  async createPixQr(accountId, amount, userId, expiresInMinutes) {
     const account = await Account.findByPk(accountId);
     if (!account) throw new Error("Conta não encontrada.");
     if (account.userId !== userId) throw new Error("Acesso negado a esta conta.");
@@ -167,6 +167,22 @@ class PixService {
     });
 
     return qr;
+  }
+
+  async deleteQrCode(txid) {
+    const pixQr = await PixQr.findAll({
+      where: { txid: String(txid) },
+    });
+
+    if (!pixQr || pixQr.length === 0) {
+      throw new Error("Nenhum QR Code encontrado.");
+    }
+
+    await PixQr.destroy({
+      where: { txid: String(txid) },
+    });
+
+    return { message: "QR Code deletado com sucesso." };
   }
 
 }

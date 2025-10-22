@@ -43,7 +43,7 @@ class PixController {
 
   async createPixQr(req, res, next) {
     try {
-      const { accountId, amount, userId, expiresInMinutes} = req.body;
+      const { accountId, amount, userId, expiresInMinutes } = req.body;
       const qr = await pixService.createPixQr(
         accountId,
         amount,
@@ -54,6 +54,17 @@ class PixController {
       next(error);
     }
   }
+
+  async deleteQrCode(req, res, next) {
+    try {
+      const { txid } = req.params;
+      const qrCodeDelete = await pixService.deleteQrCode(txid);
+      res.status(200).json(qrCodeDelete);
+    } catch (error) {
+      next(error);
+    }
+  }
+
 }
 
 module.exports = new PixController();
