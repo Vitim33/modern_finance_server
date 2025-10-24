@@ -1,10 +1,10 @@
 const bcrypt = require("bcryptjs");
-const Account = require("../models/account.model");
+const Accounts = require("../models/account.model");
 const sequelize = require("../config/database");
 
 class TransferService {
   async setTransferPassword(accountNumber, transferPassword, userId) {
-    const account = await Account.findOne({ where: { accountNumber } });
+    const account = await Accounts.findOne({ where: { accountNumber } });
     if (!account) {
       throw new Error("Conta não encontrada");
     }
@@ -19,7 +19,7 @@ class TransferService {
   }
 
   async changeTransferPassword(accountNumber, old_transferPassword, new_transferPassword, userId) {
-    const account = await Account.findOne({ where: { accountNumber } });
+    const account = await Accounts.findOne({ where: { accountNumber } });
     if (!account) {
       throw new Error("Conta não encontrada");
     }
@@ -48,7 +48,7 @@ class TransferService {
   }
 
   async verifyTransferPassword(accountNumber, userId) {
-    const account = await Account.findOne({
+    const account = await Accounts.findOne({
       where: {
         accountNumber,
         userId,
@@ -69,8 +69,8 @@ class TransferService {
   async transfer(fromAccountNumber, toAccountNumber, transferPassword, amount, userId) {
     const transaction = await sequelize.transaction();
     try {
-      const fromAccount = await Account.findOne({ where: { accountNumber: fromAccountNumber }, transaction });
-      const toAccount = await Account.findOne({ where: { accountNumber: toAccountNumber }, transaction });
+      const fromAccount = await Accounts.findOne({ where: { accountNumber: fromAccountNumber }, transaction });
+      const toAccount = await Accounts.findOne({ where: { accountNumber: toAccountNumber }, transaction });
 
       if (!fromAccount || !toAccount) {
         throw new Error("Conta origem ou destino não encontrada");

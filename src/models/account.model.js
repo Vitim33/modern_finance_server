@@ -1,8 +1,8 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
-const User = require("./user.model");
+const Users = require("./user.model");
 
-const Account = sequelize.define("Account", {
+const Accounts = sequelize.define("Accounts", {
   id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
@@ -12,7 +12,7 @@ const Account = sequelize.define("Account", {
     type: DataTypes.UUID,
     allowNull: false,
     references: {
-      model: User,
+      model: Users,
       key: "id",
     },
   },
@@ -32,8 +32,8 @@ const Account = sequelize.define("Account", {
   },
 });
 
-User.hasOne(Account, { foreignKey: "userId" });
-Account.belongsTo(User, { foreignKey: "userId" });
+Users.hasOne(Accounts, { foreignKey: "userId" });
+Accounts.belongsTo(Users, { foreignKey: "userId" });
 
-module.exports = Account;
+module.exports = Accounts;
 

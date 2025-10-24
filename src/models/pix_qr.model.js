@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 
-const PixQr = sequelize.define("PixQr", {
+const PixQrs = sequelize.define("PixQrs", {
   id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
@@ -37,4 +37,4 @@ const PixQr = sequelize.define("PixQr", {
   },
 });
 
-module.exports = PixQr;
+module.exports = PixQrs;

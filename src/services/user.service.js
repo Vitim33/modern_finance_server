@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const User = require("../models/user.model");
-const Account = require("../models/account.model");
+const Users = require("../models/user.model");
+const Accounts = require("../models/account.model");
 const sequelize = require("../config/database");
 
 const SECRET_KEY = process.env.JWT_SECRET || "minha_chave_secreta";
@@ -11,12 +11,12 @@ class UserService {
     const transaction = await sequelize.transaction();
     try {
       const hashedPassword = await bcrypt.hash(password, 10);
-      const newUser = await User.create(
+      const newUser = await Users.create(
         { name, cpf, phone, email, password: hashedPassword },
         { transaction }
       );
 
-      const newAccount = await Account.create(
+      const newAccount = await Accounts.create(
         {
           userId: newUser.id,
           accountNumber: `${Math.floor(Math.random() * 90000) + 10000}-${Math.floor(Math.random() * 9)}`,
@@ -40,7 +40,7 @@ class UserService {
   }
 
   async login(cpf, password) {
-    const user = await User.findOne({ where: { cpf } });
+    const user = await Users.findOne({ where: { cpf } });
     if (!user) {
       throw new Error("Credenciais inválidas");
     }
@@ -60,7 +60,7 @@ class UserService {
   }
 
   async getCurrentUser(userId) {
-    const user = await User.findByPk(userId, { attributes: { exclude: ['password'] } });
+    const user = await Users.findByPk(userId, { attributes: { exclude: ['password'] } });
     if (!user) {
       throw new Error("Usuário não encontrado");
     }

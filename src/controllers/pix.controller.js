@@ -13,8 +13,8 @@ class PixController {
 
   async deletePixKey(req, res, next) {
     try {
-      const { keyType } = req.params;
-      const pixKeys = await pixService.deletePixKey(keyType);
+      const { keyType, keyValue } = req.params;
+      const pixKeys = await pixService.deletePixKey(keyType, keyValue);
       res.status(200).json(pixKeys);
     } catch (error) {
       next(error);

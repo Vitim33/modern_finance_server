@@ -1,10 +1,10 @@
 const bcrypt = require("bcryptjs");
-const Account = require("../models/account.model");
+const Accounts = require("../models/account.model");
 const sequelize = require("../config/database");
 
 class AccountService {
   async getAccountByUserId(userId) {
-    const account = await Account.findOne({ where: { userId } });
+    const account = await Accounts.findOne({ where: { userId } });
     if (!account) {
       throw new Error("Conta não encontrada");
     }
@@ -12,7 +12,7 @@ class AccountService {
   }
 
   async getAccountBalance(accountId, userId) {
-    const account = await Account.findByPk(accountId);
+    const account = await Accounts.findByPk(accountId);
     if (!account) {
       throw new Error("Conta não encontrada");
     }
@@ -23,7 +23,7 @@ class AccountService {
   }
 
   async setTransferPassword(accountNumber, transferPassword, userId) {
-    const account = await Account.findOne({ where: { accountNumber } });
+    const account = await Accounts.findOne({ where: { accountNumber } });
     if (!account) {
       throw new Error("Conta não encontrada");
     }
@@ -38,7 +38,7 @@ class AccountService {
   }
 
   async changeTransferPassword(accountNumber, old_transferPassword, new_transferPassword, userId) {
-    const account = await Account.findOne({ where: { accountNumber } });
+    const account = await Accounts.findOne({ where: { accountNumber } });
     if (!account) {
       throw new Error("Conta não encontrada");
     }
@@ -67,7 +67,7 @@ class AccountService {
   }
 
   async verifyTransferPassword(accountNumber, userId) {
-    const account = await Account.findOne({
+    const account = await Accounts.findOne({
       where: {
         accountNumber,
         userId,
@@ -88,8 +88,8 @@ class AccountService {
   async transfer(fromAccountNumber, toAccountNumber, transferPassword, amount, userId) {
     const transaction = await sequelize.transaction();
     try {
-      const fromAccount = await Account.findOne({ where: { accountNumber: fromAccountNumber }, transaction });
-      const toAccount = await Account.findOne({ where: { accountNumber: toAccountNumber }, transaction });
+      const fromAccount = await Accounts.findOne({ where: { accountNumber: fromAccountNumber }, transaction });
+      const toAccount = await Accounts.findOne({ where: { accountNumber: toAccountNumber }, transaction });
 
       if (!fromAccount || !toAccount) {
         throw new Error("Conta origem ou destino não encontrada");

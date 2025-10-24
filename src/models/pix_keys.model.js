@@ -1,6 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
-const Account = require("./account.model");
+const Accounts = require("./account.model");
 
 const PixKeys = sequelize.define("PixKeys", {
   id: {
@@ -12,7 +12,7 @@ const PixKeys = sequelize.define("PixKeys", {
     type: DataTypes.UUID,
     allowNull: false,
     references: {
-      model: Account,
+      model: Accounts,
       key: "id",
     },
   },
@@ -27,7 +27,7 @@ const PixKeys = sequelize.define("PixKeys", {
   },
 });
 
-Account.hasOne(PixKeys, { foreignKey: "accountId" });
-PixKeys.belongsTo(Account, { foreignKey: "accountId" });
+Accounts.hasOne(PixKeys, { foreignKey: "accountId" });
+PixKeys.belongsTo(Accounts, { foreignKey: "accountId" });
 
 module.exports = PixKeys;

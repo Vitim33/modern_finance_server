@@ -1,14 +1,14 @@
 const bcrypt = require("bcryptjs");
 const { v4: uuidv4 } = require("uuid");
-const PixQr = require("../models/pix_qr.model");
+const PixQrs = require("../models/pix_qr.model");
 const { generatePixPayload } = require("../utils/pix_qr.utils");
-const Account = require("../models/account.model");
+const Accounts = require("../models/account.model");
 const PixKeys = require("../models/pix_keys.model");
 const sequelize = require("../config/database");
 
 class PixService {
   async createPixKey(accountId, keyType, keyValue, userId) {
-    const account = await Account.findByPk(accountId);
+    const account = await Accounts.findByPk(accountId);
     if (!account) {
       throw new Error("Conta não encontrada");
     }
@@ -38,17 +38,29 @@ class PixService {
     return pixKey;
   }
 
-  async deletePixKey(keyType) {
+  async deletePixKey(keyType, keyValue) {
     const pixKeys = await PixKeys.findAll({
-      where: { keyType: String(keyType) },
+      where: { keyType: String(keyType), keyValue: String(keyValue) },
+    });
+
+    if (!pixKeys) {
+      throw new Error("Chave PIX não encontrada.");
+    }
+
+    const qrCode = await PixQrs.findOne({
+      where: { pixKey: keyValue },
     });
 
     if (!pixKeys || pixKeys.length === 0) {
       throw new Error("Nenhuma chave PIX encontrada para este tipo.");
     }
 
+    if (qrCode) {
+      throw new Error("Esta chave está vinculada a um QR Code ativo e não pode ser excluída.");
+    }
+
     await PixKeys.destroy({
-      where: { keyType: String(keyType) },
+      where: { keyType: String(keyType), keyValue: String(keyValue) },
     });
 
     return { message: "Chave(s) PIX deletada(s) com sucesso." };
@@ -68,10 +80,10 @@ class PixService {
   }
 
 
-  async transferPix(fromAccountId, toPixKeyValue, amount, transferPassword, userId) {
+  async transferPix(fromAccountId, toPixKeyValue, amount, transferPassword, userId ) {
     const transaction = await sequelize.transaction();
     try {
-      const fromAccount = await Account.findByPk(fromAccountId, { transaction });
+      const fromAccount = await Accounts.findByPk(fromAccountId, { transaction });
       if (!fromAccount) {
         throw new Error("Conta de origem não encontrada.");
       }
@@ -100,12 +112,12 @@ class PixService {
         throw new Error("Saldo insuficiente.");
       }
 
-      const toPixKey = await PixKeys.findOne({ where: { keyValue: toPixKeyValue }, include: [Account], transaction });
+      const toPixKey = await PixKeys.findOne({ where: { keyValue: toPixKeyValue }, include: [Accounts], transaction });
       if (!toPixKey) {
         throw new Error("Chave PIX de destino não encontrada.");
       }
 
-      const toAccount = toPixKey.Account;
+      const toAccount = toPixKey.Accounts;
       if (!toAccount) {
         throw new Error("Conta de destino associada à chave PIX não encontrada.");
       }
@@ -129,7 +141,7 @@ class PixService {
   }
 
   async createPixQr(accountId, amount, userId, expiresInMinutes) {
-    const account = await Account.findByPk(accountId);
+    const account = await Accounts.findByPk(accountId);
     if (!account) throw new Error("Conta não encontrada.");
     if (account.userId !== userId) throw new Error("Acesso negado a esta conta.");
 
@@ -156,7 +168,7 @@ class PixService {
 
     const expiresAt = new Date(Date.now() + expiresInMinutes * 60000);
 
-    const qr = await PixQr.create({
+    const qr = await PixQrs.create({
       accountId,
       pixKey: chosenKey.keyValue,
       amount,
@@ -170,7 +182,7 @@ class PixService {
   }
 
   async deleteQrCode(txid) {
-    const pixQr = await PixQr.findAll({
+    const pixQr = await PixQrs.findAll({
       where: { txid: String(txid) },
     });
 
@@ -178,7 +190,7 @@ class PixService {
       throw new Error("Nenhum QR Code encontrado.");
     }
 
-    await PixQr.destroy({
+    await PixQrs.destroy({
       where: { txid: String(txid) },
     });
 

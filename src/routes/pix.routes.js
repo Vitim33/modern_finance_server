@@ -4,7 +4,7 @@ const pixController = require("../controllers/pix.controller");
 const authMiddleware = require("../middlewares/auth.middleware");
 
 router.post("/PixKey", authMiddleware, pixController.createPixKey);
-router.delete("/deletePixKey/:keyType", authMiddleware, pixController.deletePixKey);
+router.delete("/deletePixKey/:keyType/:keyValue", authMiddleware, pixController.deletePixKey);
 router.delete("/deleteQrCode/:txid", authMiddleware, pixController.deleteQrCode);
 router.get("/getPixKeysByAccountId/:accountId", authMiddleware, pixController.getPixKeysByAccountId);
 router.post("/transferPix", authMiddleware, pixController.transferPix);
