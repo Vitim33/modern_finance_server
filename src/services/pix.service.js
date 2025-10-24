@@ -3,6 +3,7 @@ const { v4: uuidv4 } = require("uuid");
 const PixQrs = require("../models/pix_qr.model");
 const { generatePixPayload } = require("../utils/pix_qr.utils");
 const Accounts = require("../models/account.model");
+const Users = require("../models/user.model");
 const PixKeys = require("../models/pix_keys.model");
 const sequelize = require("../config/database");
 
@@ -80,7 +81,7 @@ class PixService {
   }
 
 
-  async transferPix(fromAccountId, toPixKeyValue, amount, transferPassword, userId ) {
+  async transferPix(fromAccountId, toPixKeyValue, amount, transferPassword, userId) {
     const transaction = await sequelize.transaction();
     try {
       const fromAccount = await Accounts.findByPk(fromAccountId, { transaction });
@@ -142,7 +143,9 @@ class PixService {
 
   async createPixQr(accountId, amount, userId, expiresInMinutes) {
     const account = await Accounts.findByPk(accountId);
+    const user = await Users.findByPk(userId);
     if (!account) throw new Error("Conta não encontrada.");
+    if (!user) throw new Error("Usuario não encontrado.");
     if (account.userId !== userId) throw new Error("Acesso negado a esta conta.");
 
     const pixKeys = await PixKeys.findAll({ where: { accountId } });
@@ -160,7 +163,7 @@ class PixService {
     const txid = uuidv4();
     const payload = generatePixPayload({
       pixKey: chosenKey.keyValue,
-      merchantName: account.ownerName || "RECEBEDOR",
+      merchantName: user.name || "RECEBEDOR",
       merchantCity: account.city || "SAOPAULO",
       amount,
       txid,
@@ -176,6 +179,7 @@ class PixService {
       payload,
       expiresAt,
       status: "pending",
+      name: user.name
     });
 
     return qr;
@@ -195,6 +199,18 @@ class PixService {
     });
 
     return { message: "QR Code deletado com sucesso." };
+  }
+
+  async getQrCode(payload) {
+    const pixQr = await PixQrs.findAll({
+      where: { payload: String(payload) },
+    });
+
+    if (!pixQr || pixQr.length === 0) {
+      throw new Error("Nenhum QR Code encontrado.");
+    }
+
+    return pixQr;
   }
 
 }

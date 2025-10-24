@@ -65,6 +65,16 @@ class PixController {
     }
   }
 
+  async getQrCode(req, res, next) {
+    try {
+      const { payload } = req.params;
+      const grCode = await pixService.getQrCode(payload);
+      res.status(200).json(grCode);
+    } catch (error) {
+      next(error);
+    }
+  }
+
 }
 
 module.exports = new PixController();

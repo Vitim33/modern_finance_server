@@ -11,6 +11,10 @@ const PixQrs = sequelize.define("PixQrs", {
     type: DataTypes.UUID,
     allowNull: false,
   },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   pixKey: {
     type: DataTypes.STRING,
     allowNull: false,
