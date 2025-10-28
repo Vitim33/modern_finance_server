@@ -19,7 +19,6 @@ const PixKeys = sequelize.define("PixKeys", {
   keyType: {
     type: DataTypes.ENUM('CPF', 'Email', 'Telefone', 'Aleatoria'),
     allowNull: false,
-    unique: true,
   },
   keyValue: {
     type: DataTypes.STRING,
@@ -27,12 +26,12 @@ const PixKeys = sequelize.define("PixKeys", {
   },
 }, {
   indexes: [
-    {
-      unique: true,
-      fields: ['accountId', 'keyType'], 
-    },
-  ],
+    { unique: true, fields: ['accountId', 'keyType'] },
+    { unique: true, fields: ['keyValue'] },
+  ]
 });
+
+
 
 Accounts.hasOne(PixKeys, { foreignKey: "accountId" });
 PixKeys.belongsTo(Accounts, { foreignKey: "accountId" });

@@ -26,11 +26,19 @@ class PixService {
       keyValue = uuidv4();
     }
 
-    const existingKey = await PixKeys.findOne({ where: { keyValue } });
-    if (existingKey) {
-      throw new Error("Chave PIX já cadastrada.");
-    }
+    const existingKey = await PixKeys.findOne({
+    where: { accountId, keyType }
+  });
+  if (existingKey) {
+    throw new Error(`A conta já possui uma chave do tipo ${keyType}.`);
+  }
 
+     const existingValue = await PixKeys.findOne({
+    where: { keyValue }
+  });
+  if (existingValue) {
+    throw new Error("Esta chave PIX já está cadastrada em outra conta.");
+  }
     const pixKey = await PixKeys.create({
       accountId,
       keyType,
@@ -214,7 +222,7 @@ class PixService {
   }
 
 
-  async transferPayload(fromAccountId, toPayloadValue, amount, transferPassword, userId) {
+  async transferQrCode(fromAccountId, toPayloadValue, amount, transferPassword, userId) {
     const transaction = await sequelize.transaction();
     try {
       const fromAccount = await Accounts.findByPk(fromAccountId, { transaction });
@@ -246,7 +254,7 @@ class PixService {
         throw new Error("Saldo insuficiente.");
       }
 
-      const toPayload = await PixQrs.findOne({ where: { toPayload: toPayloadValue }, include: [Accounts], transaction });
+      const toPayload = await PixQrs.findOne({ where: { payload: toPayloadValue }, include: [Accounts], transaction });
       if (!toPayload) {
         throw new Error("Chave PIX de destino não encontrada.");
       }

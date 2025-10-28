@@ -75,10 +75,10 @@ class PixController {
     }
   }
 
-  async transferPayload(req, res, next) {
+  async transferQrCode(req, res, next) {
     try {
       const { fromAccountId, toPayloadValue, amount, transferPassword } = req.body;
-      const result = await pixService.transferPayload(fromAccountId, toPayloadValue, amount, transferPassword, req.user.id);
+      const result = await pixService.transferQrCode(fromAccountId, toPayloadValue, amount, transferPassword, req.user.id);
       res.status(200).json(result);
     } catch (error) {
       next(error);

@@ -9,7 +9,7 @@ router.delete("/deleteQrCode/:txid", authMiddleware, pixController.deleteQrCode)
 router.get("/getPixKeysByAccountId/:accountId", authMiddleware, pixController.getPixKeysByAccountId);
 router.get("/getQrCode/:payload", authMiddleware, pixController.getQrCode);
 router.post("/transferPix", authMiddleware, pixController.transferPix);
-router.post("/transferPayload", authMiddleware, pixController.transferPayload);
+router.post("/transferQrCode", authMiddleware, pixController.transferQrCode);
 router.post("/createPixQr", authMiddleware, pixController.createPixQr);
 
 module.exports = router;
