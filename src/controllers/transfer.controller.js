@@ -4,7 +4,7 @@ class TransferController {
   async setTransferPassword(req, res, next) {
     try {
       const { accountNumber, transferPassword } = req.body;
-      const user = req.user; 
+      const user = req.user;
 
       if (!user) {
         return res.status(401).json({ message: "Usuário não autenticado" });

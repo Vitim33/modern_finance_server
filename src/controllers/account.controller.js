@@ -21,8 +21,8 @@ class AccountController {
       next(error);
     }
   }
-
-  async register(req, res, next) {
+  
+    async register(req, res, next) {
     try {
       const { name, cpf, phone, email, password } = req.body;
       const user = await accountService.register(name, cpf, phone, email, password);
@@ -41,6 +41,8 @@ class AccountController {
       next(error);
     }
   }
+
+
 }
 
 module.exports = new AccountController(); 

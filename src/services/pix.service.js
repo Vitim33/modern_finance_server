@@ -213,6 +213,67 @@ class PixService {
     return pixQr;
   }
 
+
+  async transferPayload(fromAccountId, toPayloadValue, amount, transferPassword, userId) {
+    const transaction = await sequelize.transaction();
+    try {
+      const fromAccount = await Accounts.findByPk(fromAccountId, { transaction });
+      if (!fromAccount) {
+        throw new Error("Conta de origem não encontrada.");
+      }
+      if (fromAccount.userId !== userId) {
+        throw new Error("Acesso negado à conta de origem.");
+      }
+
+      if (!fromAccount.transferPassword) {
+        const error = new Error("Senha de transferência não definida. Por favor, defina-a antes de transferir.");
+        error.code = "P404";
+        throw error;
+      }
+
+      const isMatch = await bcrypt.compare(transferPassword, fromAccount.transferPassword);
+      if (!isMatch) {
+        const error = new Error("Senha de transferência incorreta.");
+        error.code = "P401";
+        throw error;
+      }
+
+      if (amount <= 0) {
+        throw new Error("O valor deve ser maior que zero.");
+      }
+
+      if (fromAccount.balance < amount) {
+        throw new Error("Saldo insuficiente.");
+      }
+
+      const toPayload = await PixQrs.findOne({ where: { toPayload: toPayloadValue }, include: [Accounts], transaction });
+      if (!toPayload) {
+        throw new Error("Chave PIX de destino não encontrada.");
+      }
+
+      const toAccount = toPayload.Accounts;
+      if (!toAccount) {
+        throw new Error("Conta de destino associada à chave PIX não encontrada.");
+      }
+
+      if (fromAccount.id === toAccount.id) {
+        throw new Error("Não é possível transferir para a própria conta via PIX.");
+      }
+
+      fromAccount.balance = parseFloat((fromAccount.balance - amount).toFixed(2));
+      toAccount.balance = parseFloat((toAccount.balance + amount).toFixed(2));
+
+      await fromAccount.save({ transaction });
+      await toAccount.save({ transaction });
+
+      await transaction.commit();
+      return { message: "Transferência PIX realizada com sucesso", fromAccount, toAccount };
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
+  }
+
 }
 
 module.exports = new PixService();
