@@ -1,5 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
+const Accounts = require("./account.model");
 
 const PixQrs = sequelize.define("PixQrs", {
   id: {
@@ -40,5 +41,8 @@ const PixQrs = sequelize.define("PixQrs", {
     defaultValue: "pending", 
   },
 });
+
+Accounts.hasOne(PixQrs, { foreignKey: "accountId" });
+PixQrs.belongsTo(Accounts, { foreignKey: "accountId" });
 
 module.exports = PixQrs;

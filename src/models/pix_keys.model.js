@@ -25,6 +25,13 @@ const PixKeys = sequelize.define("PixKeys", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+}, {
+  indexes: [
+    {
+      unique: true,
+      fields: ['accountId', 'keyType'], 
+    },
+  ],
 });
 
 Accounts.hasOne(PixKeys, { foreignKey: "accountId" });

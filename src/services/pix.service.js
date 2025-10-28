@@ -118,7 +118,7 @@ class PixService {
         throw new Error("Chave PIX de destino não encontrada.");
       }
 
-      const toAccount = toPixKey.Accounts;
+      const toAccount = toPixKey.Account;
       if (!toAccount) {
         throw new Error("Conta de destino associada à chave PIX não encontrada.");
       }
@@ -251,7 +251,7 @@ class PixService {
         throw new Error("Chave PIX de destino não encontrada.");
       }
 
-      const toAccount = toPayload.Accounts;
+      const toAccount = toPayload.Account;
       if (!toAccount) {
         throw new Error("Conta de destino associada à chave PIX não encontrada.");
       }
