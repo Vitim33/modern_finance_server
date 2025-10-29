@@ -21,11 +21,13 @@ const userRoutes = require("./src/routes/user.routes");
 const accountRoutes = require("./src/routes/account.routes");
 const transferRoutes = require("./src/routes/transfer.routes");
 const pixRoutes = require("./src/routes/pix.routes");
+const creditCardRoutes = require("./src/routes/credit_card.routes")
 
 app.use("/users", userRoutes);
 app.use("/accounts", accountRoutes);
 app.use("/transfers", transferRoutes);
 app.use("/pix", pixRoutes);
+app.use("/creditCard",creditCardRoutes)
 
 const errorHandler = require("./src/utils/errorHandler");
 app.use(errorHandler);
