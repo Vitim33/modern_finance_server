@@ -17,42 +17,51 @@ class CreditCardService {
   }
 
   async createCreditCard(accountId, name, password, userId) {
-  const account = await Accounts.findByPk(accountId);
-  if (!account) {
-    throw new Error("Conta não encontrada");
+    const account = await Accounts.findByPk(accountId);
+    if (!account) {
+      throw new Error("Conta não encontrada");
+    }
+
+    if (account.userId !== userId) {
+      throw new Error("Acesso negado a esta conta");
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const cardNumber = Array.from({ length: 16 }, () =>
+      Math.floor(Math.random() * 10)
+    ).join("");
+
+    const now = new Date();
+    const randomYears = Math.floor(Math.random() * 4) + 2;
+    const expiryMonth = String(Math.floor(Math.random() * 12) + 1).padStart(2, "0");
+    const expiryYear = String((now.getFullYear() + randomYears) % 100).padStart(2, "0");
+    const validate = `${expiryMonth}/${expiryYear}`;
+
+    const randomLimit = Math.round((200 + Math.random() * (15000 - 200)) * 100) / 100;
+
+    const creditCard = await CreditCards.create({
+      accountId,
+      creditCardName: name,
+      creditCardNumber: cardNumber,
+      validate,
+      creditCardPassword: hashedPassword,
+      creditCardLimit: randomLimit,
+      creditCardAvailable: randomLimit,
+      creditCardUsed: 0,
+    });
+
+    return creditCard;
   }
 
-  if (account.userId !== userId) {
-    throw new Error("Acesso negado a esta conta");
+  async updateBlockType(cardId, blockType) {
+    const creditCard = await CreditCards.findByPk(cardId);
+    if (!creditCard) throw new Error("Cartão não encontrado");
+
+    creditCard.blockType = blockType;
+    await creditCard.save();
+    return creditCard;
   }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  const cardNumber = Array.from({ length: 16 }, () =>
-    Math.floor(Math.random() * 10)
-  ).join("");
-
-  const now = new Date();
-  const randomYears = Math.floor(Math.random() * 4) + 2;
-  const expiryMonth = String(Math.floor(Math.random() * 12) + 1).padStart(2, "0");
-  const expiryYear = String((now.getFullYear() + randomYears) % 100).padStart(2, "0");
-  const validate = `${expiryMonth}/${expiryYear}`;
-
-  const randomLimit = Math.round((200 + Math.random() * (15000 - 200)) * 100) / 100;
-
-  const creditCard = await CreditCards.create({
-    accountId,
-    creditCardName: name,
-    creditCardNumber: cardNumber,
-    validate,
-    creditCardPassword: hashedPassword,
-    creditCardLimit: randomLimit,
-    creditCardAvailable: randomLimit, 
-    creditCardUsed: 0,
-  });
-
-  return creditCard;
-}
 
 }
 module.exports = new CreditCardService();

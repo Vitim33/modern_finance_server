@@ -50,10 +50,19 @@ const CreditCards = sequelize.define("CreditCards", {
     allowNull: false,
     defaultValue: 0,
   },
+  blockType: {
+    type: DataTypes.ENUM(
+      'ACTIVE',             
+      'BLOCKED'            
+    ),
+    allowNull: false,
+    defaultValue: 'ACTIVE',
+  }
 }, {
   tableName: "CreditCards",
   timestamps: true,
 });
+
 
 Account.hasOne(CreditCards, {
   foreignKey: "accountId",
