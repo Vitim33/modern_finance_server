@@ -26,9 +26,6 @@ const CreditCards = sequelize.define("CreditCards", {
     type: DataTypes.STRING(19),
     allowNull: false,
     unique: true,
-    validate: {
-      isCreditCard: true,
-    },
   },
   validate: {
     type: DataTypes.STRING(5),

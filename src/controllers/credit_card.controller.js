@@ -13,8 +13,8 @@ class CreditCardController {
 
       async createCreditCard(req, res, next) {
           try {
-            const { accountId, name, password, limit} = req.body;
-            const creditCard = await creditCardService.createCreditCard(accountId, name, password, limit, req.user.id);
+            const { accountId, name, password} = req.body;
+            const creditCard = await creditCardService.createCreditCard(accountId, name, password, req.user.id);
             res.status(200).json(creditCard);
           } catch (error) {
             next(error);
