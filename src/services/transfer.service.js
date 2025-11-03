@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const Accounts = require("../models/account.model");
+const Transfers = require("../models/tranfer.model");
 const sequelize = require("../config/database");
 
 class TransferService {

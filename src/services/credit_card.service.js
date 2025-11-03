@@ -55,8 +55,9 @@ class CreditCardService {
   }
 
   async updateBlockType(cardId, blockType) {
-    const creditCard = await CreditCards.findByPk(cardId);
-    if (!creditCard) throw new Error("Cartão não encontrado");
+    const creditCard = await CreditCards.findOne({ where: { id: cardId }});
+    if (!creditCard) 
+      throw new Error("Cartão não encontrado");
 
     creditCard.blockType = blockType;
     await creditCard.save();
