@@ -1,11 +1,20 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
+const Accounts = require("./account.model");
 
 const Transfers = sequelize.define("Transfers", {
   id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
+  },
+  accountId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    references: {
+      model: Accounts,
+      key: "id",
+    },
   },
   type: {
     type: DataTypes.STRING,
@@ -16,9 +25,9 @@ const Transfers = sequelize.define("Transfers", {
     allowNull: false,
   },
   date: {
-    type: DataTypes.DATE, 
+    type: DataTypes.DATE,
     allowNull: false,
-    defaultValue: DataTypes.NOW, 
+    defaultValue: DataTypes.NOW,
   },
   description: {
     type: DataTypes.STRING,
@@ -33,5 +42,8 @@ const Transfers = sequelize.define("Transfers", {
     allowNull: false,
   },
 });
+
+Accounts.hasOne(Transfers, { foreignKey: "accountId" });
+Transfers.belongsTo(Accounts, { foreignKey: "accountId" });
 
 module.exports = Transfers;

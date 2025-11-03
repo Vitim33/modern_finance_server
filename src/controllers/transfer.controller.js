@@ -75,6 +75,16 @@ class TransferController {
       next(error);
     }
   }
+
+   async getTransactions(req, res, next) {
+      try {
+        const { accountId } = req.params;
+        const transaction = await transferService.getTransactions(accountId);
+        res.status(200).json(transaction);
+      } catch (error) {
+        next(error);
+      }
+    }
 }
 
 module.exports = new TransferController();

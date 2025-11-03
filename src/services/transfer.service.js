@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const Accounts = require("../models/account.model");
-const Transfers = require("../models/tranfer.model");
+const Users = require("../models/user.model");
+const Transfers = require("../models/transfer.model");
 const sequelize = require("../config/database");
 
 class TransferService {
@@ -69,12 +70,32 @@ class TransferService {
 
   async transfer(fromAccountNumber, toAccountNumber, transferPassword, amount, userId) {
     const transaction = await sequelize.transaction();
+
     try {
-      const fromAccount = await Accounts.findOne({ where: { accountNumber: fromAccountNumber }, transaction });
-      const toAccount = await Accounts.findOne({ where: { accountNumber: toAccountNumber }, transaction });
+      const fromAccount = await Accounts.findOne({
+        where: { accountNumber: fromAccountNumber },
+        transaction,
+      });
+
+      const toAccount = await Accounts.findOne({
+        where: { accountNumber: toAccountNumber },
+        transaction,
+      });
+
+      const user = await Users.findOne({
+        where: { id: userId },
+      });
+
+      const toUser = await Users.findOne({
+        where: { id: toAccount.userId },
+      });
 
       if (!fromAccount || !toAccount) {
         throw new Error("Conta origem ou destino não encontrada");
+      }
+
+      if (!user) {
+        throw new Error("Usuario não encontrada");
       }
 
       if (fromAccount.userId !== userId) {
@@ -86,7 +107,9 @@ class TransferService {
       }
 
       if (!fromAccount.transferPassword) {
-        const error = new Error("Senha de transferência não definida. Por favor, defina-a antes de transferir.");
+        const error = new Error(
+          "Senha de transferência não definida. Por favor, defina-a antes de transferir."
+        );
         error.code = "P404";
         throw error;
       }
@@ -112,12 +135,42 @@ class TransferService {
       await fromAccount.save({ transaction });
       await toAccount.save({ transaction });
 
+      await Transfers.create(
+        {
+          accountId: fromAccount.id,
+          type: "Transferência",
+          amount,
+          fromAccount: user.name,
+          toAccountName: toUser.name,
+          description: "",
+          date: new Date(),
+        },
+        { transaction }
+      );
+
       await transaction.commit();
-      return { message: "Transferência realizada com sucesso", fromAccount, toAccount };
+
+      return {
+        message: "Transferência realizada com sucesso",
+        fromAccount,
+        toAccount,
+      };
     } catch (error) {
       await transaction.rollback();
       throw error;
     }
+  }
+
+  async getTransactions(accountId) {
+    const transaction = await Transfers.findAll({
+      where: { accountId: accountId },
+    });
+
+    if (!transaction || transaction.length === 0) {
+      throw new Error("Nenhuma transação encontrada.");
+    }
+
+    return transaction;
   }
 }
 
