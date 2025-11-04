@@ -16,12 +16,8 @@ const Transfers = sequelize.define("Transfers", {
       key: "id",
     },
   },
-  type: {
+  toAccountName: {
     type: DataTypes.STRING,
-    allowNull: false,
-  },
-  amount: {
-    type: DataTypes.FLOAT,
     allowNull: false,
   },
   date: {
@@ -29,15 +25,15 @@ const Transfers = sequelize.define("Transfers", {
     allowNull: false,
     defaultValue: DataTypes.NOW,
   },
-  description: {
-    type: DataTypes.STRING,
-    allowNull: true,
+  amount: {
+    type: DataTypes.FLOAT,
+    allowNull: false,
   },
-  fromAccount: {
+  category: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  toAccountName: {
+  type: {
     type: DataTypes.STRING,
     allowNull: false,
   },

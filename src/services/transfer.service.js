@@ -82,20 +82,12 @@ class TransferService {
         transaction,
       });
 
-      const user = await Users.findOne({
-        where: { id: userId },
-      });
-
       const toUser = await Users.findOne({
         where: { id: toAccount.userId },
       });
 
       if (!fromAccount || !toAccount) {
         throw new Error("Conta origem ou destino não encontrada");
-      }
-
-      if (!user) {
-        throw new Error("Usuario não encontrada");
       }
 
       if (fromAccount.userId !== userId) {
@@ -138,12 +130,25 @@ class TransferService {
       await Transfers.create(
         {
           accountId: fromAccount.id,
-          type: "Transferência",
-          amount,
-          fromAccount: user.name,
           toAccountName: toUser.name,
-          description: "",
           date: new Date(),
+          amount,
+          category: "Transferência",
+          type: "debit",
+        },
+        { transaction }
+      );
+
+      const fromUser = await Users.findOne({ where: { id: fromAccount.userId } });
+
+      await Transfers.create(
+        {
+          accountId: toAccount.id,
+          toAccountName: fromUser.name,
+          date: new Date(),
+          amount,
+          category: "Transferência",
+          type: "credit",
         },
         { transaction }
       );
@@ -160,6 +165,7 @@ class TransferService {
       throw error;
     }
   }
+
 
   async getTransactions(accountId) {
     const transaction = await Transfers.findAll({

@@ -6,6 +6,7 @@ const Accounts = require("../models/account.model");
 const Users = require("../models/user.model");
 const PixKeys = require("../models/pix_keys.model");
 const sequelize = require("../config/database");
+const Transfers = require("../models/transfer.model");
 
 class PixService {
   async createPixKey(accountId, keyType, keyValue, userId) {
@@ -27,18 +28,18 @@ class PixService {
     }
 
     const existingKey = await PixKeys.findOne({
-    where: { accountId, keyType }
-  });
-  if (existingKey) {
-    throw new Error(`A conta já possui uma chave do tipo ${keyType}.`);
-  }
+      where: { accountId, keyType }
+    });
+    if (existingKey) {
+      throw new Error(`A conta já possui uma chave do tipo ${keyType}.`);
+    }
 
-     const existingValue = await PixKeys.findOne({
-    where: { keyValue }
-  });
-  if (existingValue) {
-    throw new Error("Esta chave PIX já está cadastrada em outra conta.");
-  }
+    const existingValue = await PixKeys.findOne({
+      where: { keyValue }
+    });
+    if (existingValue) {
+      throw new Error("Esta chave PIX já está cadastrada em outra conta.");
+    }
     const pixKey = await PixKeys.create({
       accountId,
       keyType,
@@ -93,12 +94,8 @@ class PixService {
     const transaction = await sequelize.transaction();
     try {
       const fromAccount = await Accounts.findByPk(fromAccountId, { transaction });
-      if (!fromAccount) {
-        throw new Error("Conta de origem não encontrada.");
-      }
-      if (fromAccount.userId !== userId) {
-        throw new Error("Acesso negado à conta de origem.");
-      }
+      if (!fromAccount) throw new Error("Conta de origem não encontrada.");
+      if (fromAccount.userId !== userId) throw new Error("Acesso negado à conta de origem.");
 
       if (!fromAccount.transferPassword) {
         const error = new Error("Senha de transferência não definida. Por favor, defina-a antes de transferir.");
@@ -113,27 +110,15 @@ class PixService {
         throw error;
       }
 
-      if (amount <= 0) {
-        throw new Error("O valor deve ser maior que zero.");
-      }
-
-      if (fromAccount.balance < amount) {
-        throw new Error("Saldo insuficiente.");
-      }
+      if (amount <= 0) throw new Error("O valor deve ser maior que zero.");
+      if (fromAccount.balance < amount) throw new Error("Saldo insuficiente.");
 
       const toPixKey = await PixKeys.findOne({ where: { keyValue: toPixKeyValue }, include: [Accounts], transaction });
-      if (!toPixKey) {
-        throw new Error("Chave PIX de destino não encontrada.");
-      }
+      if (!toPixKey) throw new Error("Chave PIX de destino não encontrada.");
 
       const toAccount = toPixKey.Account;
-      if (!toAccount) {
-        throw new Error("Conta de destino associada à chave PIX não encontrada.");
-      }
-
-      if (fromAccount.id === toAccount.id) {
-        throw new Error("Não é possível transferir para a própria conta via PIX.");
-      }
+      if (!toAccount) throw new Error("Conta de destino associada à chave PIX não encontrada.");
+      if (fromAccount.id === toAccount.id) throw new Error("Não é possível transferir para a própria conta via PIX.");
 
       fromAccount.balance = parseFloat((fromAccount.balance - amount).toFixed(2));
       toAccount.balance = parseFloat((toAccount.balance + amount).toFixed(2));
@@ -141,13 +126,35 @@ class PixService {
       await fromAccount.save({ transaction });
       await toAccount.save({ transaction });
 
+      const toUser = await Users.findByPk(toAccount.userId);
+
+      await Transfers.create({
+        accountId: fromAccount.id,
+        toAccountName: toUser?.name || "Destinatário PIX",
+        date: new Date(),
+        amount,
+        category: "PIX",
+        type: "DEBIT",
+      }, { transaction });
+
+      await Transfers.create({
+        accountId: toAccount.id,
+        toAccountName: fromAccount.name || "Remetente PIX",
+        date: new Date(),
+        amount,
+        category: "PIX",
+        type: "CREDIT",
+      }, { transaction });
+
       await transaction.commit();
+
       return { message: "Transferência PIX realizada com sucesso", fromAccount, toAccount };
     } catch (error) {
       await transaction.rollback();
       throw error;
     }
   }
+
 
   async createPixQr(accountId, amount, userId, expiresInMinutes) {
     const account = await Accounts.findByPk(accountId);
@@ -226,12 +233,8 @@ class PixService {
     const transaction = await sequelize.transaction();
     try {
       const fromAccount = await Accounts.findByPk(fromAccountId, { transaction });
-      if (!fromAccount) {
-        throw new Error("Conta de origem não encontrada.");
-      }
-      if (fromAccount.userId !== userId) {
-        throw new Error("Acesso negado à conta de origem.");
-      }
+      if (!fromAccount) throw new Error("Conta de origem não encontrada.");
+      if (fromAccount.userId !== userId) throw new Error("Acesso negado à conta de origem.");
 
       if (!fromAccount.transferPassword) {
         const error = new Error("Senha de transferência não definida. Por favor, defina-a antes de transferir.");
@@ -246,27 +249,15 @@ class PixService {
         throw error;
       }
 
-      if (amount <= 0) {
-        throw new Error("O valor deve ser maior que zero.");
-      }
-
-      if (fromAccount.balance < amount) {
-        throw new Error("Saldo insuficiente.");
-      }
+      if (amount <= 0) throw new Error("O valor deve ser maior que zero.");
+      if (fromAccount.balance < amount) throw new Error("Saldo insuficiente.");
 
       const toPayload = await PixQrs.findOne({ where: { payload: toPayloadValue }, include: [Accounts], transaction });
-      if (!toPayload) {
-        throw new Error("Chave PIX de destino não encontrada.");
-      }
+      if (!toPayload) throw new Error("QR Code PIX de destino não encontrado.");
 
       const toAccount = toPayload.Account;
-      if (!toAccount) {
-        throw new Error("Conta de destino associada à chave PIX não encontrada.");
-      }
-
-      if (fromAccount.id === toAccount.id) {
-        throw new Error("Não é possível transferir para a própria conta via PIX.");
-      }
+      if (!toAccount) throw new Error("Conta de destino associada ao QR Code não encontrada.");
+      if (fromAccount.id === toAccount.id) throw new Error("Não é possível transferir para a própria conta via PIX.");
 
       fromAccount.balance = parseFloat((fromAccount.balance - amount).toFixed(2));
       toAccount.balance = parseFloat((toAccount.balance + amount).toFixed(2));
@@ -274,13 +265,35 @@ class PixService {
       await fromAccount.save({ transaction });
       await toAccount.save({ transaction });
 
+      const toUser = await Users.findByPk(toAccount.userId);
+
+      await Transfers.create({
+        accountId: fromAccount.id,
+        toAccountName: toUser?.name || "Destinatário QR",
+        date: new Date(),
+        amount,
+        category: "QR Code PIX",
+        type: "DEBIT",
+      }, { transaction });
+
+      await Transfers.create({
+        accountId: toAccount.id,
+        toAccountName: fromAccount.name || "Remetente QR",
+        date: new Date(),
+        amount,
+        category: "Transferência QR Code",
+        type: "CREDIT",
+      }, { transaction });
+
       await transaction.commit();
-      return { message: "Transferência PIX realizada com sucesso", fromAccount, toAccount };
+
+      return { message: "Transferência via QR Code realizada com sucesso", fromAccount, toAccount };
     } catch (error) {
       await transaction.rollback();
       throw error;
     }
   }
+
 
 }
 
