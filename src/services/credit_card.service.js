@@ -64,5 +64,21 @@ class CreditCardService {
     return creditCard;
   }
 
+  async deleteCreditCard(cardId) {
+    const creditCard = await CreditCards.findOne({
+      where: { id: String(cardId) },
+    });
+
+    if (!creditCard || creditCard.length === 0) {
+      throw new Error("Nenhum cartão encontrado.");
+    }
+
+    await creditCard.destroy({
+      where: { id: String(cardId) },
+    });
+
+    return { message: "Cartão deletado com sucesso." };
+  }
+
 }
 module.exports = new CreditCardService();

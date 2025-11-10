@@ -31,5 +31,17 @@ class CreditCardController {
       next(error);
     }
   }
+
+ async deleteCreditCard(req, res, next) {
+    try {
+      const { cardId } = req.params;
+      const deleteCreditCard = await creditCardService.deleteCreditCard(cardId);
+      res.status(200).json(deleteCreditCard);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+
 }
 module.exports = new CreditCardController();
