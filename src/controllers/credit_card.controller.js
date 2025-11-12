@@ -42,6 +42,16 @@ class CreditCardController {
     }
   }
 
+  async adjustLimit(req, res, next) {
+    try {
+      const { cardId } = req.params;
+      const { accountId, newLimitAvailable, transferPassword } = req.body;
+      const creditCard = await creditCardService.adjustLimit(cardId, accountId, newLimitAvailable, transferPassword );
+      res.status(200).json(creditCard);
+    } catch (error) {
+      next(error);
+    }
+  }
 
 }
 module.exports = new CreditCardController();

@@ -56,7 +56,7 @@ class UserService {
       { expiresIn: "1h" }
     );
 
-    return { user, token };
+    return { success: true, message:"Login realizado",   user, token };
   }
 
   async getCurrentUser(userId) {

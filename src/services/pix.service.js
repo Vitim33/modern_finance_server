@@ -7,6 +7,7 @@ const Users = require("../models/user.model");
 const PixKeys = require("../models/pix_keys.model");
 const sequelize = require("../config/database");
 const Transfers = require("../models/transfer.model");
+const { message } = require("statuses");
 
 class PixService {
   async createPixKey(accountId, keyType, keyValue, userId) {
@@ -40,12 +41,12 @@ class PixService {
     if (existingValue) {
       throw new Error("Esta chave PIX já está cadastrada em outra conta.");
     }
-    const pixKey = await PixKeys.create({
+   await PixKeys.create({
       accountId,
       keyType,
       keyValue,
     });
-    return pixKey;
+    return {success: true, message: "Chave PIX criada com sucesso"};
   }
 
   async deletePixKey(keyType, keyValue) {
@@ -73,7 +74,7 @@ class PixService {
       where: { keyType: String(keyType), keyValue: String(keyValue) },
     });
 
-    return { message: "Chave(s) PIX deletada(s) com sucesso." };
+    return {succes: true, message: "Chave(s) PIX deletada(s) com sucesso." };
   }
 
   async getPixKeysByAccountId(accountId) {
@@ -148,7 +149,7 @@ class PixService {
 
       await transaction.commit();
 
-      return { message: "Transferência PIX realizada com sucesso", fromAccount, toAccount };
+      return { success: true, message: "Transferência PIX realizada com sucesso", fromAccount, toAccount };
     } catch (error) {
       await transaction.rollback();
       throw error;
@@ -186,7 +187,7 @@ class PixService {
 
     const expiresAt = new Date(Date.now() + expiresInMinutes * 60000);
 
-    const qr = await PixQrs.create({
+    await PixQrs.create({
       accountId,
       pixKey: chosenKey.keyValue,
       amount,
@@ -197,7 +198,7 @@ class PixService {
       name: user.name
     });
 
-    return qr;
+    return {succes: true, message:"Qr Code PIX criado com sucesso"};
   }
 
   async deleteQrCode(txid) {
@@ -213,7 +214,7 @@ class PixService {
       where: { txid: String(txid) },
     });
 
-    return { message: "QR Code deletado com sucesso." };
+    return { success: true, message: "QR Code deletado com sucesso." };
   }
 
   async getQrCode(payload) {
@@ -287,7 +288,7 @@ class PixService {
 
       await transaction.commit();
 
-      return { message: "Transferência via QR Code realizada com sucesso", fromAccount, toAccount };
+      return { success: true, message: "Transferência via QR Code realizada com sucesso", fromAccount, toAccount };
     } catch (error) {
       await transaction.rollback();
       throw error;

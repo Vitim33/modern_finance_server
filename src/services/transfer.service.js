@@ -17,7 +17,7 @@ class TransferService {
     const hashedTransferPassword = await bcrypt.hash(transferPassword, 10);
     account.transferPassword = hashedTransferPassword;
     await account.save();
-    return { message: "Senha de transferência definida/atualizada com sucesso" };
+    return { success: true, message: "Senha de transferência definida/atualizada com sucesso" };
   }
 
   async changeTransferPassword(accountNumber, old_transferPassword, new_transferPassword, userId) {
@@ -46,7 +46,7 @@ class TransferService {
     const hashedNewTransferPassword = await bcrypt.hash(new_transferPassword, 10);
     account.transferPassword = hashedNewTransferPassword;
     await account.save();
-    return { message: "Senha de transferência alterada com sucesso." };
+    return { success: true, message: "Senha de transferência alterada com sucesso." };
   }
 
   async verifyTransferPassword(accountNumber, userId) {
@@ -156,6 +156,7 @@ class TransferService {
       await transaction.commit();
 
       return {
+        success: true, 
         message: "Transferência realizada com sucesso",
         fromAccount,
         toAccount,
@@ -210,8 +211,8 @@ class TransferService {
       await fromAccount.save({ transaction });
       await transaction.commit();
       return {
+        success: true,
         message: "Transferência realizada com sucesso",
-        fromAccount,
       };
     } catch (error) {
       await transaction.rollback();

@@ -8,5 +8,6 @@ router.post("/createCreditCard", authMiddleware, creditCardController.createCred
 router.post("/updateBlockType/:cardId", authMiddleware, creditCardController.updateBlockType);
 router.get("/getCreditCardByAccountId/:accountId", authMiddleware, creditCardController.getCreditCardByAccountId);
 router.delete("/deleteCreditCard/:cardId", authMiddleware, creditCardController.deleteCreditCard);
+router.post("/adjustLimit/:cardId", authMiddleware, creditCardController.adjustLimit);
 
 module.exports = router;

@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const CreditCards = require("../models/credit_card.model");
 const Accounts = require("../models/account.model");
+const { message } = require("statuses");
 
 class CreditCardService {
   async getCreditCardByAccountId(accountId) {
@@ -40,7 +41,7 @@ class CreditCardService {
 
     const randomLimit = Math.round((200 + Math.random() * (15000 - 200)) * 100) / 100;
 
-    const creditCard = await CreditCards.create({
+    await CreditCards.create({
       accountId,
       creditCardName: name,
       creditCardNumber: cardNumber,
@@ -51,17 +52,17 @@ class CreditCardService {
       creditCardUsed: 0,
     });
 
-    return creditCard;
+    return {success: true, message:"Cartão criado com sucesso"};
   }
 
   async updateBlockType(cardId, blockType) {
-    const creditCard = await CreditCards.findOne({ where: { id: cardId }});
-    if (!creditCard) 
+    const creditCard = await CreditCards.findOne({ where: { id: cardId } });
+    if (!creditCard)
       throw new Error("Cartão não encontrado");
 
     creditCard.blockType = blockType;
     await creditCard.save();
-    return creditCard;
+    return {success: true, message: "Tipo de bloqueio atualizado"};
   }
 
   async deleteCreditCard(cardId) {
@@ -77,7 +78,45 @@ class CreditCardService {
       where: { id: String(cardId) },
     });
 
-    return { message: "Cartão deletado com sucesso." };
+    return { success: true, message: "Cartão deletado com sucesso." };
+  }
+
+  async adjustLimit(cardId, accountId, newLimitAvailable, transferPassword) {
+
+    const creditCard = await CreditCards.findOne({
+      where: { id: String(cardId) },
+    });
+
+      if (!creditCard || creditCard.length === 0) {
+      throw new Error("Nenhum cartão encontrado.");
+    }
+
+    const fromAccount = await Accounts.findOne({
+        where: { id: accountId },
+      });
+      if (!fromAccount) {
+        throw new Error("Conta origem ou destino não encontrada");
+      }
+
+
+      const isMatch = await bcrypt.compare(transferPassword, fromAccount.transferPassword);
+          if (!isMatch) {
+            const error = new Error("Senha de transferência incorreta");
+            error.code = "P401";
+            throw error;
+          }
+
+     if (creditCard.creditCardUsed > newLimitAvailable) {
+      throw new Error("O novo limite deve ser maior que o usado.");
+    }
+
+      if (creditCard.creditCardLimit < newLimitAvailable) {
+      throw new Error("O novo limite deve ser menor que o limite total.");
+    }
+
+    creditCard.creditCardAvailable = newLimitAvailable;
+    await creditCard.save();
+    return {success: true , message: "Limite atualizado om sucesso."}  ;
   }
 
 }
