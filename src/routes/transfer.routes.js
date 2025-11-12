@@ -13,5 +13,6 @@ router.post("/change_transfer_password", validateChangeTransferPassword, authMid
 router.post("/verify_transfer_password", authMiddleware, transferController.verifyTransferPassword);
 router.post("/transfer", validateTransfer, authMiddleware, transferController.transfer);
 router.get("/getTransactions/:accountId", authMiddleware, transferController.getTransactions);
+router.post("/rechargePhone", authMiddleware, transferController.rechargePhone);
 
 module.exports = router;

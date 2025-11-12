@@ -178,6 +178,46 @@ class TransferService {
 
     return transaction;
   }
+
+  async rechargePhone(accountId, transferPassword, value) {
+    const transaction = await sequelize.transaction();
+
+    try {
+      const fromAccount = await Accounts.findOne({
+        where: { id: accountId },
+        transaction
+      });
+      if (!fromAccount) {
+        throw new Error("Conta origem ou destino não encontrada");
+      }
+
+      const isMatch = await bcrypt.compare(transferPassword, fromAccount.transferPassword);
+      if (!isMatch) {
+        const error = new Error("Senha de transferência incorreta");
+        error.code = "P401";
+        throw error;
+      }
+
+      if (value <= 0) {
+        throw new Error("O valor deve ser maior que zero");
+      }
+
+      if (fromAccount.balance < value) {
+        throw new Error("Saldo insuficiente");
+      }
+
+      fromAccount.balance = parseFloat((fromAccount.balance - value).toFixed(2));
+      await fromAccount.save({ transaction });
+      await transaction.commit();
+      return {
+        message: "Transferência realizada com sucesso",
+        fromAccount,
+      };
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
+  }
 }
 
 module.exports = new TransferService();
