@@ -6,7 +6,7 @@ class AccountService {
   async getAccountByUserId(userId) {
     const account = await Accounts.findOne({ where: { userId } });
     if (!account) {
-      throw new Error("Conta não encontrada");
+      return { success: false, message: "Conta não encontrada." };
     }
     return account;
   }
@@ -14,10 +14,10 @@ class AccountService {
   async getAccountBalance(accountId, userId) {
     const account = await Accounts.findByPk(accountId);
     if (!account) {
-      throw new Error("Conta não encontrada");
+      return { success: false, message: "Conta não encontrada." };
     }
     if (account.userId !== userId) {
-      throw new Error("Acesso negado a esta conta");
+      return { success: false, message: "Acesso negado a esta conta." };
     }
     return account.balance;
   }
@@ -25,45 +25,45 @@ class AccountService {
   async setTransferPassword(accountNumber, transferPassword, userId) {
     const account = await Accounts.findOne({ where: { accountNumber } });
     if (!account) {
-      throw new Error("Conta não encontrada");
+      return { success: false, message: "Conta não encontrada." };
     }
     if (account.userId !== userId) {
-      throw new Error("Acesso negado a esta conta");
+      return { success: false, message: "Acesso negado a esta conta." };
     }
 
     const hashedTransferPassword = await bcrypt.hash(transferPassword, 10);
     account.transferPassword = hashedTransferPassword;
     await account.save();
-    return { success:true, message: "Senha de transferência definida/atualizada com sucesso" };
+    return { success: true, message: "Senha de transferência definida/atualizada com sucesso." };
   }
 
   async changeTransferPassword(accountNumber, old_transferPassword, new_transferPassword, userId) {
     const account = await Accounts.findOne({ where: { accountNumber } });
     if (!account) {
-      throw new Error("Conta não encontrada");
+      return { success: false, message: "Conta não encontrada." };
     }
     if (account.userId !== userId) {
-      throw new Error("Acesso negado a esta conta");
+      return { success: false, message: "Acesso negado a esta conta." };
     }
 
     if (!account.transferPassword) {
-      throw new Error("Ainda não existe senha de transferência definida.");
+      return { success: false, message: "Ainda não existe senha de transferência definida." };
     }
 
     const isMatch = await bcrypt.compare(old_transferPassword, account.transferPassword);
     if (!isMatch) {
-      throw new Error("Senha atual incorreta.");
+      return { success: false, message: "Senha atual incorreta." };
     }
 
     const newPasswordIsSame = await bcrypt.compare(new_transferPassword, account.transferPassword);
     if (newPasswordIsSame) {
-      throw new Error("A nova senha não pode ser igual a atual.");
+      return { success: false, message: "A nova senha não pode ser igual à atual." };
     }
 
     const hashedNewTransferPassword = await bcrypt.hash(new_transferPassword, 10);
     account.transferPassword = hashedNewTransferPassword;
     await account.save();
-    return { success:true, message: "Senha de transferência alterada com sucesso." };
+    return { success: true, message: "Senha de transferência alterada com sucesso." };
   }
 
   async verifyTransferPassword(accountNumber, userId) {
@@ -75,14 +75,14 @@ class AccountService {
     });
 
     if (!account) {
-      return { success: false, message: "Conta não encontrada" };
+      return { success: false, message: "Conta não encontrada." };
     }
 
     if (account.transferPassword === null) {
-      return { success: false, message: "Senha de transferência não definida" };
+      return { success: false, message: "Senha de transferência não definida." };
     }
 
-    return { success: true, message: "Senha de transferência definida" };
+    return { success: true, message: "Senha de transferência definida." };
   }
 
   async transfer(fromAccountNumber, toAccountNumber, transferPassword, amount, userId) {
@@ -92,36 +92,39 @@ class AccountService {
       const toAccount = await Accounts.findOne({ where: { accountNumber: toAccountNumber }, transaction });
 
       if (!fromAccount || !toAccount) {
-        throw new Error("Conta origem ou destino não encontrada");
+        await transaction.rollback();
+        return { success: false, message: "Conta origem ou destino não encontrada." };
       }
 
       if (fromAccount.userId !== userId) {
-        throw new Error("Acesso negado à conta de origem");
+        await transaction.rollback();
+        return { success: false, message: "Acesso negado à conta de origem." };
       }
 
       if (fromAccount.id === toAccount.id) {
-        throw new Error("Não é possível transferir para a mesma conta");
+        await transaction.rollback();
+        return { success: false, message: "Não é possível transferir para a mesma conta." };
       }
 
       if (!fromAccount.transferPassword) {
-        const error = new Error("Senha de transferência não definida. Por favor, defina-a antes de transferir.");
-        error.code = "P404";
-        throw error;
+        await transaction.rollback();
+        return { success: false, message: "Senha de transferência não definida. Por favor, defina-a antes de transferir." };
       }
 
       const isMatch = await bcrypt.compare(transferPassword, fromAccount.transferPassword);
       if (!isMatch) {
-        const error = new Error("Senha de transferência incorreta");
-        error.code = "P401";
-        throw error;
+        await transaction.rollback();
+        return { success: false, message: "Senha de transferência incorreta." };
       }
 
       if (amount <= 0) {
-        throw new Error("O valor deve ser maior que zero");
+        await transaction.rollback();
+        return { success: false, message: "O valor deve ser maior que zero." };
       }
 
       if (fromAccount.balance < amount) {
-        throw new Error("Saldo insuficiente");
+        await transaction.rollback();
+        return { success: false, message: "Saldo insuficiente." };
       }
 
       fromAccount.balance = parseFloat((fromAccount.balance - amount).toFixed(2));
@@ -131,13 +134,12 @@ class AccountService {
       await toAccount.save({ transaction });
 
       await transaction.commit();
-      return { success: true, message: "Transferência realizada com sucesso", fromAccount, toAccount };
+      return { success: true, message: "Transferência realizada com sucesso.", fromAccount, toAccount };
     } catch (error) {
       await transaction.rollback();
-      throw error;
+      return { success: false, message: error.message };
     }
   }
 }
 
 module.exports = new AccountService();
-

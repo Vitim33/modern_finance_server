@@ -8,10 +8,10 @@ class TransferService {
   async setTransferPassword(accountNumber, transferPassword, userId) {
     const account = await Accounts.findOne({ where: { accountNumber } });
     if (!account) {
-      throw new Error("Conta não encontrada");
+      return { success: false, message: "Conta não encontrada" };
     }
     if (account.userId !== userId) {
-      throw new Error("Acesso negado a esta conta");
+      return { success: false, message: "Acesso negado a esta conta" };
     }
 
     const hashedTransferPassword = await bcrypt.hash(transferPassword, 10);
@@ -23,51 +23,47 @@ class TransferService {
   async validateTransferPassword(accountId, transferPassword, userId) {
     try {
       const account = await Accounts.findByPk(accountId);
-      if (!account) throw new Error("Conta de origem não encontrada.");
-      if (account.userId !== userId) 
-        throw new Error("Acesso negado à conta de origem.");
+      if (!account)
+        return { success: false, message: "Conta de origem não encontrada." };
+      if (account.userId !== userId)
+        return { success: false, message: "Acesso negado à conta de origem." };
 
       if (account.transferPassword === null) {
-        const error = new Error("Senha de transferência não definida. Por favor, defina-a antes de transferir.");
-        error.code = "P404";
-        throw error;
+        return { success: false, message: "Senha de transferência não definida. Por favor, defina-a antes de transferir." };
       }
 
       const isMatch = await bcrypt.compare(transferPassword, account.transferPassword);
       if (!isMatch) {
-        const error = new Error("Senha de transferência incorreta.");
-        error.code = "P401";
-        throw error;
+        return { success: false, message: "Senha de transferência incorreta." };
       }
 
       return { success: true, message: "Senha de transação validada com sucesso" };
     } catch (error) {
-      throw error;
+      return { success: false, message: "Erro ao validar senha de transferência." };
     }
-
   }
 
   async changeTransferPassword(accountNumber, old_transferPassword, new_transferPassword, userId) {
     const account = await Accounts.findOne({ where: { accountNumber } });
     if (!account) {
-      throw new Error("Conta não encontrada");
+      return { success: false, message: "Conta não encontrada" };
     }
     if (account.userId !== userId) {
-      throw new Error("Acesso negado a esta conta");
+      return { success: false, message: "Acesso negado a esta conta" };
     }
 
     if (!account.transferPassword) {
-      throw new Error("Ainda não existe senha de transferência definida.");
+      return { success: false, message: "Ainda não existe senha de transferência definida." };
     }
 
     const isMatch = await bcrypt.compare(old_transferPassword, account.transferPassword);
     if (!isMatch) {
-      throw new Error("Senha atual incorreta.");
+      return { success: false, message: "Senha atual incorreta." };
     }
 
     const newPasswordIsSame = await bcrypt.compare(new_transferPassword, account.transferPassword);
     if (newPasswordIsSame) {
-      throw new Error("A nova senha não pode ser igual a atual.");
+      return { success: false, message: "A nova senha não pode ser igual à atual." };
     }
 
     const hashedNewTransferPassword = await bcrypt.hash(new_transferPassword, 10);
@@ -89,10 +85,8 @@ class TransferService {
     }
 
     if (account.transferPassword === null) {
-        const error = new Error("Senha de transferência não definida. Por favor, defina-a antes de transferir.");
-        error.code = "P404";
-        throw error;
-      }
+      return { success: false, message: "Senha de transferência não definida. Por favor, defina-a antes de transferir." };
+    }
 
     return { success: true, message: "Senha de transferência definida" };
   }
@@ -111,43 +105,40 @@ class TransferService {
         transaction,
       });
 
-      const toUser = await Users.findOne({
-        where: { id: toAccount.userId },
-      });
-
       if (!fromAccount || !toAccount) {
-        throw new Error("Conta origem ou destino não encontrada");
+        await transaction.rollback();
+        return { success: false, message: "Conta origem ou destino não encontrada" };
       }
 
       if (fromAccount.userId !== userId) {
-        throw new Error("Acesso negado à conta de origem");
+        await transaction.rollback();
+        return { success: false, message: "Acesso negado à conta de origem" };
       }
 
       if (fromAccount.id === toAccount.id) {
-        throw new Error("Não é possível transferir para a mesma conta");
+        await transaction.rollback();
+        return { success: false, message: "Não é possível transferir para a própria conta via PIX." };
       }
 
       if (!fromAccount.transferPassword) {
-        const error = new Error(
-          "Senha de transferência não definida. Por favor, defina-a antes de transferir."
-        );
-        error.code = "P404";
-        throw error;
+        await transaction.rollback();
+        return { success: false, message: "Senha de transferência não definida. Por favor, defina-a antes de transferir." };
       }
 
       const isMatch = await bcrypt.compare(transferPassword, fromAccount.transferPassword);
       if (!isMatch) {
-        const error = new Error("Senha de transferência incorreta");
-        error.code = "P401";
-        throw error;
+        await transaction.rollback();
+        return { success: false, message: "Senha de transferência incorreta" };
       }
 
       if (amount <= 0) {
-        throw new Error("O valor deve ser maior que zero");
+        await transaction.rollback();
+        return { success: false, message: "O valor deve ser maior que zero" };
       }
 
       if (fromAccount.balance < amount) {
-        throw new Error("Saldo insuficiente");
+        await transaction.rollback();
+        return { success: false, message: "Saldo insuficiente" };
       }
 
       fromAccount.balance = parseFloat((fromAccount.balance - amount).toFixed(2));
@@ -155,6 +146,9 @@ class TransferService {
 
       await fromAccount.save({ transaction });
       await toAccount.save({ transaction });
+
+      const toUser = await Users.findOne({ where: { id: toAccount.userId } });
+      const fromUser = await Users.findOne({ where: { id: fromAccount.userId } });
 
       await Transfers.create(
         {
@@ -167,8 +161,6 @@ class TransferService {
         },
         { transaction }
       );
-
-      const fromUser = await Users.findOne({ where: { id: fromAccount.userId } });
 
       await Transfers.create(
         {
@@ -192,10 +184,9 @@ class TransferService {
       };
     } catch (error) {
       await transaction.rollback();
-      throw error;
+      return { success: false, message: "Erro ao realizar transferência" };
     }
   }
-
 
   async getTransactions(accountId) {
     const transaction = await Transfers.findAll({
@@ -215,25 +206,27 @@ class TransferService {
     try {
       const fromAccount = await Accounts.findOne({
         where: { id: accountId },
-        transaction
+        transaction,
       });
       if (!fromAccount) {
-        throw new Error("Conta origem ou destino não encontrada");
+        await transaction.rollback();
+        return { success: false, message: "Conta origem ou destino não encontrada" };
       }
 
       const isMatch = await bcrypt.compare(transferPassword, fromAccount.transferPassword);
       if (!isMatch) {
-        const error = new Error("Senha de transferência incorreta");
-        error.code = "P401";
-        throw error;
+        await transaction.rollback();
+        return { success: false, message: "Senha de transferência incorreta" };
       }
 
       if (value <= 0) {
-        throw new Error("O valor deve ser maior que zero");
+        await transaction.rollback();
+        return { success: false, message: "O valor deve ser maior que zero" };
       }
 
       if (fromAccount.balance < value) {
-        throw new Error("Saldo insuficiente");
+        await transaction.rollback();
+        return { success: false, message: "Saldo insuficiente" };
       }
 
       fromAccount.balance = parseFloat((fromAccount.balance - value).toFixed(2));
@@ -245,7 +238,7 @@ class TransferService {
       };
     } catch (error) {
       await transaction.rollback();
-      throw error;
+      return { success: false, message: "Erro ao realizar recarga." };
     }
   }
 }

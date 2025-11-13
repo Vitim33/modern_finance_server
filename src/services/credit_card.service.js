@@ -1,7 +1,6 @@
 const bcrypt = require("bcryptjs");
 const CreditCards = require("../models/credit_card.model");
 const Accounts = require("../models/account.model");
-const { message } = require("statuses");
 
 class CreditCardService {
   async getCreditCardByAccountId(accountId) {
@@ -11,7 +10,7 @@ class CreditCardService {
     });
 
     if (!creditCard || creditCard.length === 0) {
-      throw new Error("Nenhum cartão encontrada para esta conta.");
+      return { success: false, message: "Nenhum cartão encontrado para esta conta." };
     }
 
     return creditCard;
@@ -20,11 +19,11 @@ class CreditCardService {
   async createCreditCard(accountId, name, password, userId) {
     const account = await Accounts.findByPk(accountId);
     if (!account) {
-      throw new Error("Conta não encontrada");
+      return { success: false, message: "Conta não encontrada." };
     }
 
     if (account.userId !== userId) {
-      throw new Error("Acesso negado a esta conta");
+      return { success: false, message: "Acesso negado a esta conta." };
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -52,17 +51,18 @@ class CreditCardService {
       creditCardUsed: 0,
     });
 
-    return {success: true, message:"Cartão criado com sucesso"};
+    return { success: true, message: "Cartão criado com sucesso." };
   }
 
   async updateBlockType(cardId, blockType) {
     const creditCard = await CreditCards.findOne({ where: { id: cardId } });
-    if (!creditCard)
-      throw new Error("Cartão não encontrado");
+    if (!creditCard) {
+      return { success: false, message: "Cartão não encontrado." };
+    }
 
     creditCard.blockType = blockType;
     await creditCard.save();
-    return {success: true, message: "Tipo de bloqueio atualizado"};
+    return { success: true, message: "Tipo de bloqueio atualizado com sucesso." };
   }
 
   async deleteCreditCard(cardId) {
@@ -70,8 +70,8 @@ class CreditCardService {
       where: { id: String(cardId) },
     });
 
-    if (!creditCard || creditCard.length === 0) {
-      throw new Error("Nenhum cartão encontrado.");
+    if (!creditCard) {
+      return { success: false, message: "Nenhum cartão encontrado." };
     }
 
     await creditCard.destroy({
@@ -82,42 +82,39 @@ class CreditCardService {
   }
 
   async adjustLimit(cardId, accountId, newLimitAvailable, transferPassword) {
-
     const creditCard = await CreditCards.findOne({
       where: { id: String(cardId) },
     });
 
-      if (!creditCard || creditCard.length === 0) {
-      throw new Error("Nenhum cartão encontrado.");
+    if (!creditCard) {
+      return { success: false, message: "Nenhum cartão encontrado." };
     }
 
     const fromAccount = await Accounts.findOne({
-        where: { id: accountId },
-      });
-      if (!fromAccount) {
-        throw new Error("Conta origem ou destino não encontrada");
-      }
+      where: { id: accountId },
+    });
 
-
-      const isMatch = await bcrypt.compare(transferPassword, fromAccount.transferPassword);
-          if (!isMatch) {
-            const error = new Error("Senha de transferência incorreta");
-            error.code = "P401";
-            throw error;
-          }
-
-     if (creditCard.creditCardUsed > newLimitAvailable) {
-      throw new Error("O novo limite deve ser maior que o usado.");
+    if (!fromAccount) {
+      return { success: false, message: "Conta origem não encontrada." };
     }
 
-      if (creditCard.creditCardLimit < newLimitAvailable) {
-      throw new Error("O novo limite deve ser menor que o limite total.");
+    const isMatch = await bcrypt.compare(transferPassword, fromAccount.transferPassword);
+    if (!isMatch) {
+      return { success: false, message: "Senha de transferência incorreta." };
+    }
+
+    if (creditCard.creditCardUsed > newLimitAvailable) {
+      return { success: false, message: "O novo limite deve ser maior que o valor já utilizado." };
+    }
+
+    if (creditCard.creditCardLimit < newLimitAvailable) {
+      return { success: false, message: "O novo limite não pode ser maior que o limite total." };
     }
 
     creditCard.creditCardAvailable = newLimitAvailable;
     await creditCard.save();
-    return {success: true , message: "Limite atualizado om sucesso."}  ;
+    return { success: true, message: "Limite atualizado com sucesso." };
   }
-
 }
+
 module.exports = new CreditCardService();

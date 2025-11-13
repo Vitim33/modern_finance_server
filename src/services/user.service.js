@@ -32,41 +32,48 @@ class UserService {
       );
 
       await transaction.commit();
-      return { user: newUser, account: newAccount, token };
+      return { success: true, message: "Usuário registrado com sucesso", user: newUser, account: newAccount, token };
     } catch (error) {
       await transaction.rollback();
-      throw error;
+      return { success: false, message: "Erro ao registrar usuário" };
     }
   }
 
   async login(cpf, password) {
-    const user = await Users.findOne({ where: { cpf } });
-    if (!user) {
-      throw new Error("Credenciais inválidas");
+    try {
+      const user = await Users.findOne({ where: { cpf } });
+      if (!user) {
+        return { success: false, message: "Credenciais inválidas" };
+      }
+
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return { success: false, message: "Credenciais inválidas" };
+      }
+
+      const token = jwt.sign(
+        { id: user.id, cpf: user.cpf, email: user.email },
+        SECRET_KEY,
+        { expiresIn: "1h" }
+      );
+
+      return { success: true, message: "Login realizado com sucesso", user, token };
+    } catch (error) {
+      return { success: false, message: "Erro ao realizar login" };
     }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      throw new Error("Credenciais inválidas");
-    }
-
-    const token = jwt.sign(
-      { id: user.id, cpf: user.cpf, email: user.email },
-      SECRET_KEY,
-      { expiresIn: "1h" }
-    );
-
-    return { success: true, message:"Login realizado",   user, token };
   }
 
   async getCurrentUser(userId) {
-    const user = await Users.findByPk(userId, { attributes: { exclude: ['password'] } });
-    if (!user) {
-      throw new Error("Usuário não encontrado");
+    try {
+      const user = await Users.findByPk(userId, { attributes: { exclude: ["password"] } });
+      if (!user) {
+        return { success: false, message: "Usuário não encontrado" };
+      }
+      return { success: true, message:"Usuario recuperado com sucesso", user };
+    } catch (error) {
+      return { success: false, message: "Erro ao buscar informações do usuário" };
     }
-    return user;
   }
 }
 
 module.exports = new UserService();
-
