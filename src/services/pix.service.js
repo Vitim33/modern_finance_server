@@ -50,12 +50,12 @@ class PixService {
   }
 
   async deletePixKey(keyType, keyValue) {
-    const pixKeys = await PixKeys.findAll({
+    const pixKeys = await PixKeys.findOne({
       where: { keyType: String(keyType), keyValue: String(keyValue) },
     });
 
     if (!pixKeys) {
-      throw new Error("Chave PIX não encontrada.");
+      console.warn("⚠️ Chave PIX não encontrada.");
     }
 
     const qrCode = await PixQrs.findOne({
@@ -63,11 +63,11 @@ class PixService {
     });
 
     if (!pixKeys || pixKeys.length === 0) {
-      throw new Error("Nenhuma chave PIX encontrada para este tipo.");
+      console.warn("⚠️ Nenhuma chave PIX encontrada para este tipo.")
     }
 
     if (qrCode) {
-      throw new Error("Esta chave está vinculada a um QR Code ativo e não pode ser excluída.");
+      console.warn("⚠️ Esta chave está vinculada a um QR Code ativo e não pode ser excluída.");
     }
 
     await PixKeys.destroy({

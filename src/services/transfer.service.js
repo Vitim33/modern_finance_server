@@ -174,7 +174,7 @@ class TransferService {
     });
 
     if (!transaction || transaction.length === 0) {
-      throw new Error("Nenhuma transação encontrada.");
+      console.warn("⚠️ Nenhuma transação encontrada.");
     }
 
     return transaction;

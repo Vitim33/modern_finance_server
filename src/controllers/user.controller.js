@@ -9,6 +9,7 @@ class UserController {
       const { user, account, token } = await userService.register(name, cpf, phone, email, password);
 
       res.status(200).json({
+        success: true,
         message: "Usuário e conta criados com sucesso",
         token,
         user,
@@ -25,6 +26,7 @@ class UserController {
       const { user, token } = await userService.login(cpf, password);
 
       res.status(200).json({
+        success: true,
         message: "Login realizado com sucesso",
         token,
         user: { id: user.id, name: user.name, cpf: user.cpf, phone: user.phone, email: user.email }
@@ -37,7 +39,10 @@ class UserController {
   async getCurrentUser(req, res, next) {
     try {
       const user = await userService.getCurrentUser(req.user.id);
-      res.status(200).json({ user });
+      res.status(200).json({ 
+         success: true,
+        message: "Usuario obtido com sucesso",
+        user });
     } catch (error) {
       next(error);
     }
@@ -51,7 +56,7 @@ class UserController {
 
       invalidTokens.push(req.token);
 
-      res.json({ status: true, message: "Logout realizado com sucesso" });
+      res.json({ success: true, message: "Logout realizado com sucesso" });
     } catch (error) {
       res.status(500).json({ status: false, message: "Erro ao realizar logout", error: error.message });
     }
