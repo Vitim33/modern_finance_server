@@ -20,6 +20,33 @@ class TransferService {
     return { success: true, message: "Senha de transferência definida/atualizada com sucesso" };
   }
 
+  async validateTransferPassword(accountId, transferPassword, userId) {
+    try {
+      const account = await Accounts.findByPk(accountId);
+      if (!account) throw new Error("Conta de origem não encontrada.");
+      if (account.userId !== userId) 
+        throw new Error("Acesso negado à conta de origem.");
+
+      if (account.transferPassword === null) {
+        const error = new Error("Senha de transferência não definida. Por favor, defina-a antes de transferir.");
+        error.code = "P404";
+        throw error;
+      }
+
+      const isMatch = await bcrypt.compare(transferPassword, account.transferPassword);
+      if (!isMatch) {
+        const error = new Error("Senha de transferência incorreta.");
+        error.code = "P401";
+        throw error;
+      }
+
+      return { success: true, message: "Senha de transação validada com sucesso" };
+    } catch (error) {
+      throw error;
+    }
+
+  }
+
   async changeTransferPassword(accountNumber, old_transferPassword, new_transferPassword, userId) {
     const account = await Accounts.findOne({ where: { accountNumber } });
     if (!account) {
@@ -62,8 +89,10 @@ class TransferService {
     }
 
     if (account.transferPassword === null) {
-      return { success: false, message: "Senha de transferência não definida" };
-    }
+        const error = new Error("Senha de transferência não definida. Por favor, defina-a antes de transferir.");
+        error.code = "P404";
+        throw error;
+      }
 
     return { success: true, message: "Senha de transferência definida" };
   }
@@ -156,7 +185,7 @@ class TransferService {
       await transaction.commit();
 
       return {
-        success: true, 
+        success: true,
         message: "Transferência realizada com sucesso",
         fromAccount,
         toAccount,

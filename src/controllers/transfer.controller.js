@@ -17,6 +17,22 @@ class TransferController {
     }
   }
 
+  async validateTransferPassword(req, res, next) {
+    try {
+      const { accountId, transferPassword } = req.body
+      const user = req.user;
+
+       if (!user) {
+        return res.status(401).json({ message: "Usuário não autenticado" });
+      }
+
+      const result = await transferService.validateTransferPassword(accountId, transferPassword, user.id);
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async changeTransferPassword(req, res, next) {
     try {
       const { accountNumber, old_transferPassword, new_transferPassword } = req.body;
@@ -88,7 +104,7 @@ class TransferController {
 
   async rechargePhone(req, res, next) {
     try {
-      const {accountId, transferPassword, value } = req.body;
+      const { accountId, transferPassword, value } = req.body;
       const rechargePhone = await transferService.rechargePhone(accountId, transferPassword, value);
       res.status(200).json(rechargePhone);
     } catch (error) {

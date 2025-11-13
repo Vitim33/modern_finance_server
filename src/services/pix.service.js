@@ -91,25 +91,12 @@ class PixService {
   }
 
 
-  async transferPix(fromAccountId, toPixKeyValue, amount, transferPassword, userId) {
+  async transferPix(fromAccountId, toPixKeyValue, amount, userId) {
     const transaction = await sequelize.transaction();
     try {
       const fromAccount = await Accounts.findByPk(fromAccountId, { transaction });
       if (!fromAccount) throw new Error("Conta de origem não encontrada.");
       if (fromAccount.userId !== userId) throw new Error("Acesso negado à conta de origem.");
-
-      if (!fromAccount.transferPassword) {
-        const error = new Error("Senha de transferência não definida. Por favor, defina-a antes de transferir.");
-        error.code = "P404";
-        throw error;
-      }
-
-      const isMatch = await bcrypt.compare(transferPassword, fromAccount.transferPassword);
-      if (!isMatch) {
-        const error = new Error("Senha de transferência incorreta.");
-        error.code = "P401";
-        throw error;
-      }
 
       if (amount <= 0) throw new Error("O valor deve ser maior que zero.");
       if (fromAccount.balance < amount) throw new Error("Saldo insuficiente.");

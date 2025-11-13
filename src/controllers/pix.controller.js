@@ -33,8 +33,8 @@ class PixController {
 
   async transferPix(req, res, next) {
     try {
-      const { fromAccountId, toPixKeyValue, amount, transferPassword } = req.body;
-      const result = await pixService.transferPix(fromAccountId, toPixKeyValue, amount, transferPassword, req.user.id);
+      const { fromAccountId, toPixKeyValue, amount } = req.body;
+      const result = await pixService.transferPix(fromAccountId, toPixKeyValue, amount, req.user.id);
       res.status(200).json(result);
     } catch (error) {
       next(error);
