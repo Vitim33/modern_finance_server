@@ -12,7 +12,7 @@ router.post("/set_transfer_password", validateSetTransferPassword, authMiddlewar
 router.post("/change_transfer_password", validateChangeTransferPassword, authMiddleware, transferController.changeTransferPassword);
 router.post("/verify_transfer_password", authMiddleware, transferController.verifyTransferPassword);
 router.post("/validate_transfer_password", authMiddleware, transferController.validateTransferPassword);
-router.post("/transfer", validateTransfer, authMiddleware, transferController.transfer);
+router.post("/transfer", authMiddleware, transferController.transfer);
 router.get("/get_transactions/:accountId", authMiddleware, transferController.getTransactions);
 router.post("/recharge_phone", authMiddleware, transferController.rechargePhone);
 

@@ -72,7 +72,7 @@ class TransferController {
 
   async transfer(req, res, next) {
     try {
-      const { fromAccountNumber, toAccountNumber, transferPassword, amount } = req.body;
+      const { fromAccountNumber, toAccountNumber, amount } = req.body;
       const user = req.user;
 
       if (!user) {
@@ -82,7 +82,6 @@ class TransferController {
       const result = await transferService.transfer(
         fromAccountNumber,
         toAccountNumber,
-        transferPassword,
         amount,
         user.id
       );

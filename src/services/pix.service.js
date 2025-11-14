@@ -195,7 +195,7 @@ class PixService {
     return { success: true, message: "QR Code encontrado com sucesso.", pixQr };
   }
 
-  async transferQrCode(fromAccountId, toPayloadValue, amount, transferPassword, userId) {
+  async transferQrCode(fromAccountId, toPayloadValue, amount, userId) {
     const transaction = await sequelize.transaction();
     try {
       const fromAccount = await Accounts.findByPk(fromAccountId, { transaction });
@@ -211,12 +211,6 @@ class PixService {
       if (!fromAccount.transferPassword) {
         await transaction.rollback();
         return { success: false, message: "Senha de transferência não definida. Por favor, defina-a antes de transferir." };
-      }
-
-      const isMatch = await bcrypt.compare(transferPassword, fromAccount.transferPassword);
-      if (!isMatch) {
-        await transaction.rollback();
-        return { success: false, message: "Senha de transferência incorreta." };
       }
 
       if (amount <= 0) {

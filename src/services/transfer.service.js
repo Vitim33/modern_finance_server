@@ -91,7 +91,7 @@ class TransferService {
     return { success: true, message: "Senha de transferência definida" };
   }
 
-  async transfer(fromAccountNumber, toAccountNumber, transferPassword, amount, userId) {
+  async transfer(fromAccountNumber, toAccountNumber, amount, userId) {
     const transaction = await sequelize.transaction();
 
     try {
@@ -123,12 +123,6 @@ class TransferService {
       if (!fromAccount.transferPassword) {
         await transaction.rollback();
         return { success: false, message: "Senha de transferência não definida. Por favor, defina-a antes de transferir." };
-      }
-
-      const isMatch = await bcrypt.compare(transferPassword, fromAccount.transferPassword);
-      if (!isMatch) {
-        await transaction.rollback();
-        return { success: false, message: "Senha de transferência incorreta" };
       }
 
       if (amount <= 0) {
