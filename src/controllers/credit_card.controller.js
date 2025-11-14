@@ -32,7 +32,7 @@ class CreditCardController {
     }
   }
 
- async deleteCreditCard(req, res, next) {
+  async deleteCreditCard(req, res, next) {
     try {
       const { cardId } = req.params;
       const deleteCreditCard = await creditCardService.deleteCreditCard(cardId);
@@ -46,7 +46,7 @@ class CreditCardController {
     try {
       const { cardId } = req.params;
       const { accountId, newLimitAvailable, transferPassword } = req.body;
-      const creditCard = await creditCardService.adjustLimit(cardId, accountId, newLimitAvailable, transferPassword );
+      const creditCard = await creditCardService.adjustLimit(cardId, accountId, newLimitAvailable, transferPassword);
       res.status(200).json(creditCard);
     } catch (error) {
       next(error);

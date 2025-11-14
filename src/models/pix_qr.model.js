@@ -30,7 +30,7 @@ const PixQrs = sequelize.define("PixQrs", {
   },
   payload: {
     type: DataTypes.TEXT,
-    allowNull: false, 
+    allowNull: false,
   },
   expiresAt: {
     type: DataTypes.DATE,
@@ -38,7 +38,7 @@ const PixQrs = sequelize.define("PixQrs", {
   },
   status: {
     type: DataTypes.STRING,
-    defaultValue: "pending", 
+    defaultValue: "pending",
   },
 });
 

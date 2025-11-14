@@ -22,7 +22,7 @@ class TransferController {
       const { accountId, transferPassword } = req.body
       const user = req.user;
 
-       if (!user) {
+      if (!user) {
         return res.status(401).json({ message: "Usuário não autenticado" });
       }
 

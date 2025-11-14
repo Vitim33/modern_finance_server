@@ -57,7 +57,7 @@ class PixService {
     if (!pixKeys || pixKeys.length === 0) {
       return { success: false, message: "Nenhuma chave PIX encontrada para esta conta." };
     }
-    return { success: true, message: "Chave PIX recuperada com sucesso.",  pixKeys };
+    return { success: true, message: "Chave PIX recuperada com sucesso.", pixKeys };
   }
 
   async transferPix(fromAccountId, toPixKeyValue, amount, userId) {

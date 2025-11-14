@@ -39,10 +39,11 @@ class UserController {
   async getCurrentUser(req, res, next) {
     try {
       const user = await userService.getCurrentUser(req.user.id);
-      res.status(200).json({ 
-         success: true,
+      res.status(200).json({
+        success: true,
         message: "Usuario obtido com sucesso",
-        user });
+        user
+      });
     } catch (error) {
       next(error);
     }

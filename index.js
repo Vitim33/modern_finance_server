@@ -27,7 +27,7 @@ app.use("/users", userRoutes);
 app.use("/accounts", accountRoutes);
 app.use("/transfers", transferRoutes);
 app.use("/pix", pixRoutes);
-app.use("/creditCard",creditCardRoutes)
+app.use("/credit_card",creditCardRoutes)
 
 const errorHandler = require("./src/utils/errorHandler");
 app.use(errorHandler);

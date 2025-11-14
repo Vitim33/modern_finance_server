@@ -52,10 +52,10 @@ const CreditCards = sequelize.define("CreditCards", {
   },
   blockType: {
     type: DataTypes.ENUM(
-      'ACTIVE',             
+      'ACTIVE',
       'BLOCKED_DEF',
-      'BLOCKED_TMP', 
-      'BLOCKED_PRV'         
+      'BLOCKED_TMP',
+      'BLOCKED_PRV'
     ),
     allowNull: false,
     defaultValue: 'ACTIVE',

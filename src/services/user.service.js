@@ -69,7 +69,7 @@ class UserService {
       if (!user) {
         return { success: false, message: "Usuário não encontrado" };
       }
-      return { success: true, message:"Usuario recuperado com sucesso", user };
+      return { success: true, message: "Usuario recuperado com sucesso", user };
     } catch (error) {
       return { success: false, message: "Erro ao buscar informações do usuário" };
     }
