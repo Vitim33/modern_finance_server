@@ -103,8 +103,8 @@ class TransferController {
 
   async rechargePhone(req, res, next) {
     try {
-      const { accountId, transferPassword, value } = req.body;
-      const rechargePhone = await transferService.rechargePhone(accountId, transferPassword, value);
+      const { accountId, value } = req.body;
+      const rechargePhone = await transferService.rechargePhone(accountId, value);
       res.status(200).json(rechargePhone);
     } catch (error) {
       next(error);

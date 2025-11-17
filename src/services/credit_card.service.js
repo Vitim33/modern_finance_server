@@ -81,7 +81,7 @@ class CreditCardService {
     return { success: true, message: "Cartão deletado com sucesso." };
   }
 
-  async adjustLimit(cardId, accountId, newLimitAvailable, transferPassword) {
+  async adjustLimit(cardId, accountId, newLimitAvailable) {
     const creditCard = await CreditCards.findOne({
       where: { id: String(cardId) },
     });
@@ -96,11 +96,6 @@ class CreditCardService {
 
     if (!fromAccount) {
       return { success: false, message: "Conta origem não encontrada." };
-    }
-
-    const isMatch = await bcrypt.compare(transferPassword, fromAccount.transferPassword);
-    if (!isMatch) {
-      return { success: false, message: "Senha de transferência incorreta." };
     }
 
     if (creditCard.creditCardUsed > newLimitAvailable) {

@@ -194,7 +194,7 @@ class TransferService {
     return transaction;
   }
 
-  async rechargePhone(accountId, transferPassword, value) {
+  async rechargePhone(accountId, value) {
     const transaction = await sequelize.transaction();
 
     try {
@@ -205,12 +205,6 @@ class TransferService {
       if (!fromAccount) {
         await transaction.rollback();
         return { success: false, message: "Conta origem ou destino não encontrada" };
-      }
-
-      const isMatch = await bcrypt.compare(transferPassword, fromAccount.transferPassword);
-      if (!isMatch) {
-        await transaction.rollback();
-        return { success: false, message: "Senha de transferência incorreta" };
       }
 
       if (value <= 0) {

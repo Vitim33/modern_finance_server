@@ -5,7 +5,6 @@ const authMiddleware = require("../middlewares/auth.middleware");
 const {
   validateSetTransferPassword,
   validateChangeTransferPassword,
-  validateTransfer
 } = require("../validators/transfer.validator");
 
 router.post("/set_transfer_password", validateSetTransferPassword, authMiddleware, transferController.setTransferPassword);
