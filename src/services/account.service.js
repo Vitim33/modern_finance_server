@@ -37,7 +37,7 @@ class AccountService {
     return { success: true, message: "Senha de transferência definida/atualizada com sucesso." };
   }
 
-  async changeTransferPassword(accountNumber, old_transferPassword, new_transferPassword, userId) {
+  async changeTransferPassword(accountNumber, oldTransferPassword, newTransferPassword, userId) {
     const account = await Accounts.findOne({ where: { accountNumber } });
     if (!account) {
       return { success: false, message: "Conta não encontrada." };
@@ -50,17 +50,17 @@ class AccountService {
       return { success: false, message: "Ainda não existe senha de transferência definida." };
     }
 
-    const isMatch = await bcrypt.compare(old_transferPassword, account.transferPassword);
+    const isMatch = await bcrypt.compare(oldTransferPassword, account.transferPassword);
     if (!isMatch) {
       return { success: false, message: "Senha atual incorreta." };
     }
 
-    const newPasswordIsSame = await bcrypt.compare(new_transferPassword, account.transferPassword);
+    const newPasswordIsSame = await bcrypt.compare(newTransferPassword, account.transferPassword);
     if (newPasswordIsSame) {
       return { success: false, message: "A nova senha não pode ser igual à atual." };
     }
 
-    const hashedNewTransferPassword = await bcrypt.hash(new_transferPassword, 10);
+    const hashedNewTransferPassword = await bcrypt.hash(newTransferPassword, 10);
     account.transferPassword = hashedNewTransferPassword;
     await account.save();
     return { success: true, message: "Senha de transferência alterada com sucesso." };

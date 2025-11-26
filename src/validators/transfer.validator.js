@@ -12,8 +12,8 @@ const setTransferPasswordSchema = Joi.object({
 
 const changeTransferPasswordSchema = Joi.object({
   accountNumber: Joi.string().required(),
-  old_transferPassword: transferPasswordSchema,
-  new_transferPassword: transferPasswordSchema,
+  oldTransferPassword: transferPasswordSchema,
+  newTransferPassword: transferPasswordSchema,
 });
 
 const transferSchema = Joi.object({

@@ -35,7 +35,7 @@ class TransferController {
 
   async changeTransferPassword(req, res, next) {
     try {
-      const { accountNumber, old_transferPassword, new_transferPassword } = req.body;
+      const { accountNumber, oldTransferPassword, newTransferPassword } = req.body;
       const user = req.user;
 
       if (!user) {
@@ -44,8 +44,8 @@ class TransferController {
 
       const result = await transferService.changeTransferPassword(
         accountNumber,
-        old_transferPassword,
-        new_transferPassword,
+        oldTransferPassword,
+        newTransferPassword,
         user.id
       );
       res.status(200).json(result);
