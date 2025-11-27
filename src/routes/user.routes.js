@@ -7,6 +7,7 @@ const router = express.Router();
 
 router.post("/register", validateRegister, userController.register.bind(userController));
 router.post("/login", validateLogin, userController.login.bind(userController));
+router.post("/set_new_phone_number", authenticateToken, userController.setNewPhoneNumber);
 router.get("/me", authenticateToken, userController.getCurrentUser.bind(userController));
 router.post("/logout", authenticateToken, userController.logout.bind(userController));
 

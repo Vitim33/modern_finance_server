@@ -41,8 +41,6 @@ class AccountController {
       next(error);
     }
   }
-
-
 }
 
-module.exports = new AccountController(); 
+module.exports = new AccountController();

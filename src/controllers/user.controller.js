@@ -62,6 +62,17 @@ class UserController {
       res.status(500).json({ status: false, message: "Erro ao realizar logout", error: error.message });
     }
   }
+
+  async setNewPhoneNumber(req, res, next) {
+    try {
+      const { newPhone, userId, oldPhone } = req.body;
+      const result = await userService.setNewPhoneNumber(newPhone, userId, oldPhone);
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
 }
 
 const userController = new UserController();
