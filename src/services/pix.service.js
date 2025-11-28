@@ -105,6 +105,7 @@ class PixService {
       await toAccount.save({ transaction });
 
       const toUser = await Users.findByPk(toAccount.userId);
+      const fromUser = await Users.findByPk(fromAccount.userId);
 
       await Transfers.create({
         accountId: fromAccount.id,
@@ -117,7 +118,7 @@ class PixService {
 
       await Transfers.create({
         accountId: toAccount.id,
-        toAccountName: fromAccount.name || "Remetente PIX",
+        toAccountName: fromUser.name || "Remetente PIX",
         date: new Date(),
         amount,
         category: "PIX",
