@@ -73,6 +73,55 @@ class UserController {
     }
   }
 
+  async updateFcmToken(req, res) {
+    try {
+      const userId = req.user.id;
+      const { fcmToken } = req.body;
+
+      if (!fcmToken) {
+        return res.status(400).json({
+          success: false,
+          message: "FCM token é obrigatório",
+        });
+      }
+
+      const user = await require("../models/user.model").findByPk(userId);
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "Usuário não encontrado",
+        });
+      }
+
+      // evita update desnecessário
+      if (user.fcmToken === fcmToken) {
+        return res.status(200).json({
+          success: true,
+          message: "Token já está atualizado",
+        });
+      }
+
+      user.fcmToken = fcmToken;
+      await user.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Token atualizado com sucesso",
+        data: {
+          fcmToken: user.fcmToken,
+        },
+      });
+    } catch (error) {
+      console.error("Erro ao atualizar FCM token:", error);
+
+      return res.status(500).json({
+        success: false,
+        message: "Erro ao atualizar token",
+      });
+    }
+  }
+
 }
 
 const userController = new UserController();

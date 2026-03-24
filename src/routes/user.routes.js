@@ -10,5 +10,6 @@ router.post("/login", validateLogin, userController.login.bind(userController));
 router.post("/set_new_phone_number", authenticateToken, userController.setNewPhoneNumber);
 router.get("/me", authenticateToken, userController.getCurrentUser.bind(userController));
 router.post("/logout", authenticateToken, userController.logout.bind(userController));
+router.put("/fcm-token", authenticateToken, userController.updateFcmToken.bind(userController));
 
 module.exports = router;

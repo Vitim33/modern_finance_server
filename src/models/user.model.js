@@ -34,6 +34,10 @@ const Users = sequelize.define("Users", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  fcmToken: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  }
 });
 
 module.exports = Users;
