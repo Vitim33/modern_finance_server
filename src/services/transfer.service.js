@@ -3,6 +3,8 @@ const Accounts = require("../models/account.model");
 const Users = require("../models/user.model");
 const Transfers = require("../models/transfer.model");
 const sequelize = require("../config/database");
+const { db } = require('../config/firebase');
+const { sendPushNotification } = require('../utils/notification');
 
 class TransferService {
   async setTransferPassword(accountNumber, transferPassword, userId) {
@@ -169,6 +171,47 @@ class TransferService {
       );
 
       await transaction.commit();
+
+      // 🔔 Enviar push (fora da transação)
+      try {
+        // Busca usuário destino com token
+        const toUserWithToken = await Users.findOne({
+          where: { id: toAccount.userId },
+        });
+
+        if (toUserWithToken?.fcmToken) {
+          await sendPushNotification({
+            token: toUserWithToken.fcmToken,
+            title: "💰 Você recebeu uma transferência!",
+            body: `Você recebeu R$ ${amount} de ${fromUser.name}`,
+            data: {
+              type: "transfer",
+              amount: amount.toString(),
+              fromUser: fromUser.name,
+            },
+          });
+        }
+
+        // (opcional) push para quem enviou
+        const fromUserWithToken = await Users.findOne({
+          where: { id: fromAccount.userId },
+        });
+
+        if (fromUserWithToken?.fcmToken) {
+          await sendPushNotification({
+            token: fromUserWithToken.fcmToken,
+            title: "📤 Transferência enviada",
+            body: `Você enviou R$ ${amount} para ${toUser.name}`,
+            data: {
+              type: "transfer_sent",
+              amount: amount.toString(),
+              toUser: toUser.name,
+            },
+          });
+        }
+      } catch (err) {
+        console.error("Erro ao enviar push:", err);
+      }
 
       return {
         success: true,
