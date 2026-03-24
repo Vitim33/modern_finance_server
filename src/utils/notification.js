@@ -1,20 +1,30 @@
-const { admin } = require('../config/firebase');
+const { admin } = require("../config/firebase");
 
 async function sendPushNotification({ token, title, body, data = {} }) {
   try {
     const message = {
-      token,
+      token: token,
+
       notification: {
-        title,
-        body,
+        title: title,
+        body: body,
       },
-      data,
+
+      data: data,
+
+      android: {
+        priority: "high",
+        notification: {
+          channelId: "high_importance_channel",
+        },
+      },
     };
 
-    await admin.messaging().send(message);
-    console.log('Push enviado com sucesso');
+    const response = await admin.messaging().send(message);
+
+    console.log("✅ Push enviado:", response);
   } catch (error) {
-    console.error('Erro ao enviar push:', error);
+    console.error("❌ Erro ao enviar push:", error);
   }
 }
 
