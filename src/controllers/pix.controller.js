@@ -31,6 +31,16 @@ class PixController {
     }
   }
 
+  async getBeneficiaryByPixKey(req, res, next) {
+    try {
+      const { toPixKeyValue } = req.params;
+      const toUser = await pixService.getBeneficiaryByPixKey(toPixKeyValue);
+      res.status(200).json(toUser);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async transferPix(req, res, next) {
     try {
       const { fromAccountId, toPixKeyValue, amount } = req.body;

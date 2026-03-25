@@ -7,6 +7,7 @@ const Users = require("../models/user.model");
 const PixKeys = require("../models/pix_keys.model");
 const sequelize = require("../config/database");
 const Transfers = require("../models/transfer.model");
+const { sendPushNotification } = require('../utils/notification');
 
 class PixService {
   async createPixKey(accountId, keyType, keyValue, userId) {
@@ -58,6 +59,30 @@ class PixService {
       return { success: false, message: "Nenhuma chave PIX encontrada para esta conta." };
     }
     return { success: true, message: "Chave PIX recuperada com sucesso.", pixKeys };
+  }
+
+  async getBeneficiaryByPixKey(toPixKeyValue) {
+    const toPixKey = await PixKeys.findOne({
+      where: { keyValue: toPixKeyValue },
+      include: [{
+        model: Accounts,
+        include: [Users]
+      }]
+    });
+
+    if (!toPixKey) {
+      return { success: false, message: "Chave PIX de destino não encontrada." };
+    }
+
+    if (!toPixKey.Account || !toPixKey.Account.User) {
+      return { success: false, message: "Usuário não encontrado." };
+    }
+
+    return {
+      success: true,
+      message: "Usuário recuperado com sucesso.",
+      toUser: toPixKey.Account.User
+    };
   }
 
   async transferPix(fromAccountId, toPixKeyValue, amount, userId) {
@@ -126,7 +151,47 @@ class PixService {
       }, { transaction });
 
       await transaction.commit();
+
+      try {
+        const toUserWithToken = await Users.findOne({
+          where: { id: toAccount.userId },
+        });
+
+        if (toUserWithToken?.fcmToken) {
+          await sendPushNotification({
+            token: toUserWithToken.fcmToken,
+            title: "💰 Você recebeu um PIX!",
+            body: `Você recebeu R$ ${amount} de ${fromUser.name}`,
+            data: {
+              type: "pix",
+              amount: amount.toString(),
+              fromUser: fromUser.name,
+            },
+          });
+        }
+
+        const fromUserWithToken = await Users.findOne({
+          where: { id: fromAccount.userId },
+        });
+
+        if (fromUserWithToken?.fcmToken) {
+          await sendPushNotification({
+            token: fromUserWithToken.fcmToken,
+            title: "📤 PIX enviado",
+            body: `Você enviou R$ ${amount} para ${toUser.name}`,
+            data: {
+              type: "pix_sent",
+              amount: amount.toString(),
+              toUser: toUser.name,
+            },
+          });
+        }
+      } catch (err) {
+        console.error("Erro ao enviar push:", err);
+      }
+
       return { success: true, message: "Transferência PIX realizada com sucesso.", fromAccount, toAccount };
+
     } catch (error) {
       await transaction.rollback();
       return { success: false, message: error.message };

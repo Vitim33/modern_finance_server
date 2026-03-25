@@ -172,9 +172,7 @@ class TransferService {
 
       await transaction.commit();
 
-      // 🔔 Enviar push (fora da transação)
       try {
-        // Busca usuário destino com token
         const toUserWithToken = await Users.findOne({
           where: { id: toAccount.userId },
         });
@@ -192,7 +190,6 @@ class TransferService {
           });
         }
 
-        // (opcional) push para quem enviou
         const fromUserWithToken = await Users.findOne({
           where: { id: fromAccount.userId },
         });
